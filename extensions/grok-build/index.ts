@@ -19,6 +19,7 @@ const GrokBuildInputSchema = Type.Object(
 interface ExecutableProbe {
 	name: string;
 	found: boolean;
+	ambiguous: boolean;
 	path?: string;
 }
 
@@ -35,8 +36,8 @@ export default function piGrokBuildExtension(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "grok_build",
 		label: "Grok Build",
-		description: "Read-only bootstrap doctor for the Pi Grok Build package. Checks local Grok Build executable discovery only; this 0.0.x release does not launch Grok Build or send prompts.",
-		promptSnippet: "Read-only bootstrap doctor for Pi Grok Build; action doctor checks local executable discovery only.",
+		description: "Read-only bootstrap doctor for the Pi Grok Build package. Checks local Grok Build executable candidates only; this 0.0.x release does not launch Grok Build or send prompts.",
+		promptSnippet: "Read-only bootstrap doctor for Pi Grok Build; action doctor checks local executable-candidate discovery only.",
 		promptGuidelines: [
 			"Use grok_build with action doctor only to inspect whether a Grok Build executable is discoverable on PATH.",
 			"Do not treat grok_build doctor output as proof of Grok Build login, subscription, prompt behavior, worktree safety, or operational delegation.",
@@ -45,11 +46,19 @@ export default function piGrokBuildExtension(pi: ExtensionAPI) {
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const action = params.action ?? "doctor";
 			if (action !== "doctor") throw new Error(`Unsupported grok_build action: ${String(action)}`);
-			const executables = EXECUTABLE_CANDIDATES.map((name) => ({ name, ...findExecutableOnPath(name) }));
+			const executables = EXECUTABLE_CANDIDATES.map((name) => ({
+				name,
+				ambiguous: name === "grok",
+				...findExecutableOnPath(name),
+			}));
 			const first = executables.find((candidate) => candidate.found);
+			const candidateLine = first
+				? `Found executable candidate: ${first.name} at ${first.path}${first.ambiguous ? " (ambiguous generic command)" : ""}`
+				: "No grok-build or grok executable was found on PATH.";
 			const lines = [
 				"pi-grok-build bootstrap doctor",
-				first ? `Found Grok Build candidate: ${first.name} at ${first.path}` : "No grok-build or grok executable was found on PATH.",
+				candidateLine,
+				"This is candidate discovery only, not executable identity, login, subscription, prompt, sandbox, or delegation proof.",
 				"This 0.0.x bootstrap release does not launch Grok Build, send prompts, spend provider quota, edit files, or manage delegated sessions.",
 				"Next implementation step: add an explicit Pi-native lifecycle contract after source review and live/provider-use consent design.",
 			];
@@ -59,7 +68,7 @@ export default function piGrokBuildExtension(pi: ExtensionAPI) {
 				operational: false,
 				cwd: ctx.cwd,
 				executables,
-				next: "Implement start/status/result/cancel/cleanup only after the consent, artifact, and launch-policy contract is accepted.",
+				next: "Implement start/status/result/cancel/cleanup only after the consent, artifact, executable-identity, and launch-policy contract is accepted.",
 			};
 			return { content: [{ type: "text", text: lines.join("\n") }], details };
 		},

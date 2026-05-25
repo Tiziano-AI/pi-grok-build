@@ -1,8 +1,8 @@
 {
   "name": "pi-grok-build",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
-  "description": "Pi extension for delegating to xAI Grok Build with Pi-native lifecycle, artifacts, and safety controls.",
+  "description": "Bootstrap Pi package for a source-inspectable xAI Grok Build integration.",
   "keywords": [
     "pi-package",
     "pi",
@@ -29,6 +29,12 @@
   },
   "files": [
     "README.md",
+    "ARCH.md",
+    "VISION.md",
+    "SECURITY.md",
+    "PRIVACY.md",
+    "TERMS.md",
+    "RELEASE.md",
     "CHANGELOG.md",
     "LICENSE",
     "docs/**/*.md",
@@ -41,8 +47,8 @@
     "gate": "npm test && npm run check:pack && git diff --check"
   },
   "peerDependencies": {
-    "@earendil-works/pi-ai": ">=0.74.0",
-    "@earendil-works/pi-coding-agent": ">=0.74.0",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
     "typebox": "*"
   },
   "pi": {

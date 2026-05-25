@@ -1,6 +1,11 @@
 # Local Pi/runtime state
 .pi/
 
+# Local operator/control-plane notes (durable public policy lives in docs/)
+AGENTS.md
+PLAN.md
+HANDOFF.md
+
 # Dependencies and build outputs
 node_modules/
 dist/
