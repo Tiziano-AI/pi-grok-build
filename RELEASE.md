@@ -4,7 +4,7 @@
 
 `0.0.1` was the name-reservation bootstrap release.
 
-Current source is `0.0.2` and remains a bootstrap candidate unless and until the human publishes it. Agents must not run `npm publish` without explicit authorization for the exact package, version, and tag.
+Current source is `0.0.2` and remains a bootstrap candidate unless and until the human publishes it. Agent-side publication requires explicit authorization for the exact package, version, and tag.
 
 One version must align across:
 
@@ -42,11 +42,11 @@ git diff --check
 - `extensions/**/*.ts`
 - `skills/**/*.md`
 
-It must not include `.pi/`, local `AGENTS.md`, local `PLAN.md`, local `HANDOFF.md`, `node_modules/`, generated tarballs, caches, or secrets.
+The package candidate keeps local/runtime material outside the tarball: `.pi/`, local `AGENTS.md`, local `PLAN.md`, local `HANDOFF.md`, `node_modules/`, generated tarballs, caches, and secrets.
 
 ## Pi resource proof
 
-Package source and npm pack proof do not prove Pi loaded the package.
+Source and npm pack proof cover package files. Pi resource proof is the next layer.
 
 Minimum non-provider Pi proof for a release candidate:
 
@@ -54,13 +54,13 @@ Minimum non-provider Pi proof for a release candidate:
 2. Pi can expose the `grok_build` tool from the package extension in a current runtime/tool-list proof.
 3. The `grok_build doctor` action can be called without launching Grok Build.
 
-A failed or unavailable Pi runtime smoke is a proof gap, not a source failure, unless it identifies a package-specific load error.
+A failed or unavailable Pi runtime smoke is a proof gap unless it identifies a package-specific load error.
 
 ## Live Grok Build proof
 
-No live Grok Build proof is required for the bootstrap doctor package.
+Bootstrap doctor releases require source/package and Pi resource proof only.
 
-Any future prompt-carrying proof requires explicit provider/subscription-use authorization and must record:
+Future prompt-carrying proof requires explicit provider/subscription-use authorization and records:
 
 - exact command/path used;
 - consent source;
@@ -78,7 +78,7 @@ npm view pi-grok-build name version dist-tags repository.url dist.integrity --js
 npm pack pi-grok-build@<version> --dry-run --json
 ```
 
-Do not claim a newly published version is installed or loaded in Pi until Pi package/runtime proof exists.
+Installed/loaded claims additionally require Pi package/runtime proof.
 
 ## Rollback and teardown
 
@@ -88,4 +88,4 @@ Session cleanup, package uninstall, and npm dist-tags are separate controls.
 - `pi remove npm:pi-grok-build` or `pi config` controls Pi package exposure.
 - npm dist-tags control registry default installation behavior.
 
-Do not confuse artifact deletion with active Pi tool-exposure teardown or npm package rollback.
+Artifact deletion, Pi tool-exposure teardown, and npm package rollback each need their own receipt.

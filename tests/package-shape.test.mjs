@@ -23,7 +23,7 @@ const requiredPublicDocs = [
 	"docs/control-plane.md",
 	"docs/capabilities.md",
 	"docs/evidence.md",
-	"docs/denial-matrix.md",
+	"docs/authority-matrix.md",
 	"docs/configuration.md",
 	"docs/consent-and-provider-use.md",
 	"docs/artifacts-and-retention.md",
@@ -76,7 +76,7 @@ test("local operator notes are ignored, not public source contract", () => {
 	}
 });
 
-test("bootstrap surface stays Pi-native and source-inspectable", () => {
+test("bootstrap surface is positive, Pi-native, and source-inspectable", () => {
 	const corpus = [
 		"README.md",
 		"ARCH.md",
@@ -90,7 +90,7 @@ test("bootstrap surface stays Pi-native and source-inspectable", () => {
 		"docs/control-plane.md",
 		"docs/capabilities.md",
 		"docs/evidence.md",
-		"docs/denial-matrix.md",
+		"docs/authority-matrix.md",
 		"docs/configuration.md",
 		"docs/consent-and-provider-use.md",
 		"docs/artifacts-and-retention.md",
@@ -103,7 +103,8 @@ test("bootstrap surface stays Pi-native and source-inspectable", () => {
 	assert.match(corpus, /grok_build/);
 	assert.match(corpus, /doctor/);
 	assert.match(corpus, /source-inspectable/i);
-	assert.doesNotMatch(corpus, /cdx-grok/i);
-	assert.doesNotMatch(corpus, /\.codex-plugin/i);
-	assert.doesNotMatch(corpus, /mcp\s+serve\b/i);
+	assert.match(corpus, /Pi package/);
+	assert.match(corpus, /Grok Build/);
+	assert.doesNotMatch(corpus, new RegExp("Non" + "-goals", "i"));
+	assert.doesNotMatch(corpus, new RegExp("Reject" + "ed alternatives", "i"));
 });

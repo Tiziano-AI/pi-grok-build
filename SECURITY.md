@@ -2,21 +2,20 @@
 
 ## Bootstrap posture
 
-`pi-grok-build@0.0.x` is intentionally non-operational. The current `grok_build doctor` action:
+`pi-grok-build@0.0.x` is a read-only bootstrap. The current `grok_build doctor` action performs executable-candidate discovery and returns structured status.
 
-- does not launch Grok Build;
-- does not shell out;
-- does not call xAI, Grok, or any provider API;
-- does not read credential files;
-- does not mutate files;
-- does not create background jobs;
-- does not delete artifacts.
+Current runtime behavior:
+
+- reads `PATH` entries for candidate names;
+- reports candidate paths when executable bits are present;
+- returns bootstrap status and next-step guidance;
+- keeps credentials, provider calls, shells, background jobs, and filesystem mutation outside the current action.
 
 Pi packages and extensions run with the user's local permissions. Treat installation as a source-trust decision.
 
 ## Model-facing authority
 
-The only accepted model-facing tool name is:
+The Pi model-facing tool is:
 
 ```text
 grok_build
@@ -28,21 +27,19 @@ Current accepted action:
 doctor
 ```
 
-Every other action is denied in `0.0.x`.
-
-Future operational actions must keep raw authority behind operator-owned configuration. The model must not supply arbitrary executable paths, raw Grok Build flags, environment variables, credentials, auth methods, provider accounts, sandbox names, hook/plugin paths, or cleanup roots.
+Future operational actions keep raw authority behind operator-owned configuration. The public tool schema should expose curated profile ids and job controls, while executable paths, raw launch flags, environment variables, credentials, auth methods, provider accounts, sandbox names, hook/plugin paths, and cleanup roots remain policy/config concerns.
 
 ## Executable discovery
 
-The doctor may report `grok-build` or `grok` candidates from `PATH`. That is candidate discovery only.
+The doctor may report `grok-build` or `grok` candidates from `PATH`. That is candidate discovery.
 
-A future `start` implementation must not launch the first discovered `PATH` candidate by default. Launch requires at least one accepted policy:
+A future `start` implementation needs a stronger launch policy, such as:
 
 - an operator-configured executable path/profile; or
 - a documented identity/version verification path; and
 - explicit per-run consent or a durable operator preauthorization policy.
 
-The generic `grok` command name is ambiguous and must be treated as lower-trust than a configured executable path.
+The generic `grok` command name is treated as an ambiguous candidate until accepted by launch policy.
 
 ## Consent and provider use
 
@@ -50,33 +47,23 @@ Launching Grok Build can send prompts, source context, file contents, tool resul
 
 ## Worktree and filesystem safety
 
-Future write-capable delegation must be profile-gated. It must define:
+Future write-capable delegation is profile-gated. It needs:
 
 - admitted cwd rules;
 - dirty-worktree handling;
 - read-only versus write-capable profiles;
 - artifact roots owned by this extension;
-- path traversal and symlink-denial rules;
-- actual filesystem/git readback for changes, not model-authored patch text.
-
-Until those contracts are implemented and tested, `pi-grok-build` must not perform worktree mutation.
+- path traversal and symlink controls;
+- actual filesystem/git readback for changes.
 
 ## Process and cleanup ownership
 
-Future `cancel` may cancel only a process/job spawned and recorded by `pi-grok-build` for the addressed job id.
+Future `cancel` addresses only a process/job spawned and recorded by `pi-grok-build` for the addressed job id.
 
-Future `cleanup` may delete only `pi-grok-build`-owned retained artifacts for the addressed job. It must not claim to delete:
-
-- Grok account state;
-- xAI provider state;
-- Grok memory;
-- Grok auth files;
-- arbitrary Grok worktrees;
-- Pi package installation state;
-- active Pi tool exposure.
+Future `cleanup` addresses only `pi-grok-build`-owned retained artifacts for the addressed job. Package cleanup is separate from Grok account state, xAI provider state, Grok memory, auth files, arbitrary worktrees, Pi package installation state, and active Pi tool exposure.
 
 Uninstalling or disabling the Pi package is a separate Pi package-management action.
 
-## Denial matrix
+## Authority matrix
 
-See [Denial matrix](docs/denial-matrix.md) for current and future fail-closed rows.
+See [Authority matrix](docs/authority-matrix.md) for current and future authority rows.

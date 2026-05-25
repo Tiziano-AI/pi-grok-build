@@ -1,44 +1,35 @@
 # pi-grok-build
 
-Pi-native integration package for **xAI Grok Build**, the Grok coding agent/CLI.
+Pi package for bringing **xAI Grok Build** into Pi as a source-inspectable extension, tool, and skill.
 
-This repo exists so Pi can leverage Grok Build through source-inspectable Pi package, extension, and skill surfaces. It is independent of Codex/CDX product surfaces and does not use MCP as the Pi integration surface.
+`pi-grok-build` gives Pi a native `grok_build` tool surface and package docs for operating Grok Build with explicit consent, retained evidence, and bounded output.
 
 ## Status
 
-`pi-grok-build` is still a `0.0.x` bootstrap.
+`pi-grok-build` is in the `0.0.x` bootstrap line.
 
-The published `0.0.1` package reserved the name and shipped a source-inspectable, read-only doctor. Current source prepares the next bootstrap candidate with the public control-plane docs required before operational delegation.
+Published `0.0.1` reserved the package name and shipped the first source-inspectable doctor. Current source prepares the next bootstrap candidate with the public control plane required before operational delegation.
 
-Implemented today:
+Current scope:
 
 - Pi package manifest with `pi.extensions` and `pi.skills`
-- one read-only Pi tool, `grok_build`, with `action: "doctor"`
-- one Pi skill, `pi-grok-build`
+- read-only `grok_build` tool with `action: "doctor"`
+- `pi-grok-build` skill
 - package-shape tests and npm pack dry-run gate
-- public control-plane docs for capability, evidence, consent, security, release, and denial boundaries
+- public docs for capability, evidence, consent, security, release, and authority boundaries
 
-Not implemented today:
+The doctor is the first-success path. Operational delegation is the next design phase.
 
-- no Grok Build launch
-- no prompt-carrying provider/subscription use
-- no worktree edits
-- no delegated sessions
-- no background process supervision
-- no artifact cleanup beyond static package checks
+## Product direction
 
-## Why this package exists
+Grok Build is a terminal coding agent with interactive, headless, and agent-protocol modes. Pi Grok Build will provide a Pi-owned supervision layer around that product:
 
-Grok Build is its own terminal coding agent. Pi should be able to delegate to it without pretending it is just a model provider and without depending on another agent harness transport.
-
-The mature product target is:
-
-- one Pi-native model-facing tool, `grok_build`
-- curated lifecycle actions, not raw Grok Build flags
-- operator-owned configuration for executable identity, launch policy, auth/account posture, cwd/worktree policy, output limits, and retention
-- explicit consent before launching Grok Build or sending prompt-carrying work to xAI/Grok
-- bounded previews plus retained artifact paths for full output
-- source/live proof that separates package source, npm tarballs, Pi loader visibility, doctor output, and authorized live behavior
+- one model-facing Pi tool: `grok_build`
+- curated lifecycle actions for launch, status, results, cancellation, and cleanup
+- operator-owned launch profiles and executable identity policy
+- explicit consent before prompt-carrying provider/subscription use
+- bounded previews with artifact paths for full evidence
+- source/package/Pi-loader/live-proof separation
 
 ## Install
 
@@ -68,7 +59,7 @@ Ask Pi to use the `grok_build` tool with the only implemented action:
 { "action": "doctor" }
 ```
 
-The doctor reports whether `grok-build` or `grok` is discoverable on `PATH`. Treat that result as local executable-candidate evidence only. It does not prove Grok Build identity, login, subscription status, prompt behavior, sandbox/worktree safety, or delegation correctness.
+The doctor reports whether `grok-build` or `grok` is discoverable on `PATH`. Treat the result as executable-candidate evidence for that invocation. Operational readiness requires the stronger proof ladder in [Evidence ledger](docs/evidence.md).
 
 ## Control-plane docs
 
@@ -81,7 +72,7 @@ The doctor reports whether `grok-build` or `grok` is discoverable on `PATH`. Tre
 - [Control plane](docs/control-plane.md)
 - [Capabilities](docs/capabilities.md)
 - [Evidence ledger](docs/evidence.md)
-- [Denial matrix](docs/denial-matrix.md)
+- [Authority matrix](docs/authority-matrix.md)
 - [Configuration](docs/configuration.md)
 - [Consent and provider use](docs/consent-and-provider-use.md)
 - [Artifacts and retention](docs/artifacts-and-retention.md)
@@ -89,7 +80,7 @@ The doctor reports whether `grok-build` or `grok` is discoverable on `PATH`. Tre
 - [ADR 0001: name and boundary](docs/adr-0001-name-and-boundary.md)
 - [ADR 0002: Pi tool contract](docs/adr-0002-pi-tool-contract.md)
 
-Local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` files are intentionally ignored. Durable public package policy belongs in the tracked docs above.
+Local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` files are ignored checkout/session notes. Durable package policy belongs in the tracked docs above.
 
 ## Development checks
 
@@ -99,18 +90,10 @@ npm run check:pack
 git diff --check
 ```
 
-`npm run check:pack` uses `npm pack --dry-run --json`; it does not create a tarball.
+`npm run check:pack` uses `npm pack --dry-run --json` without leaving a tarball behind.
 
 ## Security posture
 
 Pi packages run with the user's full local permissions. Review source before installing any Pi package, including this one.
 
-This bootstrap release intentionally avoids runtime dependencies, shelling out, network calls, credential reads, prompt-carrying Grok Build launches, and filesystem mutation.
-
-## Non-goals
-
-- no generic xAI/Grok model provider as this package's first surface
-- no MCP bridge as the Pi integration surface
-- no CDX/Codex dependency
-- no unreviewed third-party runtime dependency
-- no model-facing raw Grok Build flag DSL
+The bootstrap runtime scope is read-only candidate discovery with zero runtime dependencies, shell execution, network calls, credential reads, provider use, or filesystem mutation.

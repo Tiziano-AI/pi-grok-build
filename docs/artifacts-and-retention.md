@@ -1,6 +1,6 @@
 # Artifacts and Retention
 
-No artifacts are created by `0.0.x`.
+Current `0.0.x` doctor behavior is stateless: it creates zero package artifacts.
 
 Future operational releases need retained evidence because Grok Build output, logs, status, and changes can exceed safe model-context limits.
 
@@ -23,9 +23,9 @@ Required artifacts for future prompt-carrying jobs:
 
 Model-facing tool results must stay bounded. Large output should be truncated and point to a retained artifact path. Truncation policy should follow Pi extension guidance: keep model context small, clearly label truncation, and preserve full evidence when safe.
 
-## Cleanup limits
+## Cleanup authority
 
-Future `cleanup` deletes only package-owned artifacts for the addressed job. It must not delete:
+Future `cleanup` is package-scoped. It addresses package-owned artifacts for the selected job and leaves other authority domains to their owners:
 
 - files outside the package artifact root;
 - symlink escape targets;
@@ -37,4 +37,4 @@ Future `cleanup` deletes only package-owned artifacts for the addressed job. It 
 
 ## Retention proof
 
-A cleanup receipt should prove only that the package-owned artifact directory was removed or marked unavailable. It must not claim provider-side deletion, Grok memory deletion, auth deletion, or Pi tool exposure teardown.
+A cleanup receipt proves package-owned artifact disposition for one job. Provider-side deletion, Grok memory deletion, auth deletion, and Pi tool exposure teardown require separate owner-specific receipts.

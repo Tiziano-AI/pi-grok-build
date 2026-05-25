@@ -2,8 +2,6 @@
 
 `pi-grok-build` is a Pi package made of one extension and one skill.
 
-Current runtime implementation is deliberately small:
-
 ```text
 Pi package manifest
   ├─ extension: extensions/grok-build/index.ts
@@ -12,7 +10,7 @@ Pi package manifest
        └─ skill: pi-grok-build
 ```
 
-The current tool only checks local executable candidates on `PATH`. It does not launch Grok Build.
+The current tool performs read-only executable-candidate discovery. Operational delegation will be added only after the launch, consent, state, artifact, and proof contracts are implemented together.
 
 ## Public surface
 
@@ -28,13 +26,13 @@ Implemented action:
 doctor
 ```
 
-Future governed lifecycle actions may include:
+Planned governed lifecycle actions:
 
 ```text
 start | status | result | cancel | cleanup
 ```
 
-`changes` and `send` are not accepted bootstrap promises. They require a later ADR if Grok Build's real lifecycle and Pi user experience justify them.
+Additional actions such as follow-up turns or change readback will be designed from observed Grok Build behavior and added through later ADRs.
 
 ## Source layers
 
@@ -43,13 +41,13 @@ start | status | result | cancel | cleanup
 | Package manifest | `package.json` | Declares Pi extension and skill resources. |
 | Extension source | `extensions/grok-build/index.ts` | Registers read-only `grok_build doctor`. |
 | Skill source | `skills/pi-grok-build/SKILL.md` | Teaches Pi agents the bootstrap boundary. |
-| Public docs | root docs and `docs/` | Define future-proof control-plane boundaries. |
+| Public docs | root docs and `docs/` | Define product, capability, proof, release, and authority contracts. |
 | Local operator notes | ignored `AGENTS.md`, `PLAN.md`, `HANDOFF.md` | Local checkout/session guidance only. |
-| Runtime state | ignored `.pi/`, future artifact roots | Not portable source. |
+| Runtime state | ignored `.pi/`, future artifact roots | Local runtime evidence, not portable source. |
 
 ## Intended mature flow
 
-The future operational architecture is a supervised Pi extension lifecycle, not a raw CLI wrapper:
+The operational architecture is a supervised Pi extension lifecycle:
 
 ```text
 grok_build start
@@ -57,7 +55,7 @@ grok_build start
   ├─ verify operator configuration and consent
   ├─ verify executable identity/launch policy
   ├─ create pi-grok-build-owned job and artifact root
-  ├─ launch Grok Build only after authorization
+  ├─ launch Grok Build through the selected profile
   └─ stream bounded status while retaining full artifacts
 
 grok_build status/result/cancel/cleanup
@@ -67,20 +65,14 @@ grok_build status/result/cancel/cleanup
   └─ preserve artifact paths/checksums for full evidence
 ```
 
-## Non-goals and rejected architectural paths
+## Launch and ownership principles
 
-- no Codex/CDX dependency
-- no MCP bridge as the Pi package surface
-- no raw xAI API fallback for the Grok Build delegation product
-- no TUI scraping fallback
-- no model-facing raw Grok Build flag DSL
-- no launch of the first executable found on `PATH` without identity and consent policy
-- no cleanup or cancellation of processes/artifacts not owned by this extension
+- Pi owns the package surface and parent-agent supervision.
+- Grok Build owns its native coding-agent execution.
+- Operator configuration owns raw launch policy and provider/auth posture.
+- `pi-grok-build` owns job ids, retained artifacts, output bounds, cancellation receipts, and cleanup receipts for jobs it creates.
+- Parent Pi remains final authority for acceptance, validation, commits, publication, and user-facing claims.
 
 ## External authority boundary
 
-Official xAI docs checked on 2026-05-25 describe Grok Build as usable through an interactive TUI, headless `grok -p` mode, and ACP `grok agent stdio`. Those are external capabilities of Grok Build, not accepted `pi-grok-build` runtime paths until this repo adds a specific ADR, implementation, and proof lane.
-
-## Acceptance authority
-
-Pi remains the parent agent/harness. Grok Build output is evidence or candidate work only. Future `pi-grok-build` must not claim final acceptance, validation, merge, commit, publication, or user-visible truth without parent review and explicit proof.
+Official xAI docs checked on 2026-05-25 describe Grok Build as usable through interactive, headless, and agent-protocol modes. Those are Grok Build capabilities. `pi-grok-build` adopts a capability only when this repo adds the corresponding source contract, implementation, and proof lane.

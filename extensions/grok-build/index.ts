@@ -36,11 +36,11 @@ export default function piGrokBuildExtension(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "grok_build",
 		label: "Grok Build",
-		description: "Read-only bootstrap doctor for the Pi Grok Build package. Checks local Grok Build executable candidates only; this 0.0.x release does not launch Grok Build or send prompts.",
-		promptSnippet: "Read-only bootstrap doctor for Pi Grok Build; action doctor checks local executable-candidate discovery only.",
+		description: "Read-only bootstrap doctor for the Pi Grok Build package. Checks local Grok Build executable candidates and returns structured package/environment status.",
+		promptSnippet: "Read-only bootstrap doctor for Pi Grok Build; action doctor checks local executable-candidate discovery.",
 		promptGuidelines: [
-			"Use grok_build with action doctor only to inspect whether a Grok Build executable is discoverable on PATH.",
-			"Do not treat grok_build doctor output as proof of Grok Build login, subscription, prompt behavior, worktree safety, or operational delegation.",
+			"Use grok_build with action doctor to inspect whether a Grok Build executable candidate is discoverable on PATH.",
+			"Treat grok_build doctor output as package/environment discovery. Operational readiness needs the proof ladder in pi-grok-build docs.",
 		],
 		parameters: GrokBuildInputSchema,
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -58,8 +58,8 @@ export default function piGrokBuildExtension(pi: ExtensionAPI) {
 			const lines = [
 				"pi-grok-build bootstrap doctor",
 				candidateLine,
-				"This is candidate discovery only, not executable identity, login, subscription, prompt, sandbox, or delegation proof.",
-				"This 0.0.x bootstrap release does not launch Grok Build, send prompts, spend provider quota, edit files, or manage delegated sessions.",
+				"Scope: package/environment discovery for this invocation.",
+				"Current implementation: read-only doctor status. Operational delegation is the next design phase.",
 				"Next implementation step: add an explicit Pi-native lifecycle contract after source review and live/provider-use consent design.",
 			];
 			const details: DoctorDetails = {

@@ -1,8 +1,8 @@
 # Configuration
 
-No operational configuration is implemented in `0.0.x`.
+Current `0.0.x` configuration scope is intentionally small: `grok_build doctor` reads `process.env.PATH` for executable-candidate discovery.
 
-The current package has no config file, no environment-variable contract, no executable override, no profile system, and no artifact root setting. `grok_build doctor` reads only `process.env.PATH` for candidate discovery.
+The bootstrap line introduces package-owned configuration with the future `start` contract.
 
 ## Future operator-owned config
 
@@ -21,22 +21,21 @@ Possible operator-owned fields:
 | artifact root/retention | No | Own retained evidence and cleanup. |
 | provider/auth posture | No | Reference local auth mode without storing or exposing secret values. |
 
-## Denied config paths
+## Package config boundaries
 
-Do not use these as package config contracts:
+Package config should be a small, typed operator surface. Model-facing tool arguments should stay focused on curated action/profile/job choices while these authority sources remain in operator policy:
 
-- raw model-supplied Grok Build flags;
-- prompt-supplied environment variables;
-- arbitrary paths supplied in a tool call;
-- CDX/Codex config roots;
-- Pi session `.pi/` state;
-- Grok credential files;
-- undocumented local dotfiles.
+- raw launch flags;
+- environment variables;
+- arbitrary executable paths;
+- credentials or auth file contents;
+- provider account selectors;
+- cleanup roots.
 
 ## Grok Build external config
 
-Official xAI docs checked on 2026-05-25 describe Grok Build config, auth, permissions, sandbox profiles, skills, plugins, hooks, and enterprise requirements. Those may inform a future `pi-grok-build` config design, but the package must not claim to own or validate Grok Build's full config without current official docs or observed runtime proof.
+Official xAI docs checked on 2026-05-25 describe Grok Build config, auth, permissions, sandbox profiles, skills, plugins, hooks, and enterprise requirements. Those may inform a future `pi-grok-build` config design. Package docs should cite current official docs or observed runtime behavior for external Grok Build semantics.
 
 ## Config readback
 
-A mature release should include a safe config readback surface that reports origins, selected profile ids, and non-secret policy posture. It must not print token values, API keys, auth file contents, or provider account secrets.
+A mature release should include a safe config readback surface that reports origins, selected profile ids, and non-secret policy posture. Token values, API keys, auth file contents, and provider account secrets stay outside model-facing output.

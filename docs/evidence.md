@@ -2,37 +2,37 @@
 
 Freshness date: 2026-05-25.
 
-This ledger separates source proof, npm/package proof, Pi loader proof, doctor proof, live Grok Build proof, and deferred proof.
+This ledger names each proof layer and the maximum claim it supports.
 
 ## External authority rows
 
-| Source | Type | Checked | Claims used | Notes |
+| Source | Type | Checked | Claims used | Use in this repo |
 | --- | --- | --- | --- | --- |
-| `https://docs.x.ai/build/overview` | Official xAI docs | 2026-05-25 | Grok Build supports TUI, headless use, ACP, install command, local auth/API-key paths. | Current source for product shape only, not package runtime proof. |
-| `https://docs.x.ai/build/cli/headless-scripting` | Official xAI docs | 2026-05-25 | Headless `grok -p`, `--output-format plain/json/streaming-json`, ACP `grok agent stdio`. | Any runtime path still needs package ADR/proof before adoption. |
-| `https://docs.x.ai/build/enterprise` | Official xAI docs | 2026-05-25 | Auth methods, network hosts, config layers, permissions, sandbox profiles, data lifecycle. | Do not quote credential values or assume local config. |
-| `https://docs.x.ai/build/features/skills-plugins-marketplaces` | Official xAI docs | 2026-05-25 | Grok skills/plugins/hooks/subagents and compatibility surfaces. | These are Grok Build internals, not Pi package integration surfaces. |
-| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/packages.md` | Installed Pi docs | 2026-05-25 | Pi package manifest, package security warning, install/update/package source behavior. | Local installed docs are authoritative for this workstation's Pi semantics. |
-| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/extensions.md` | Installed Pi docs | 2026-05-25 | `pi.registerTool`, tool output truncation, `StringEnum`, extension permissions. | Used for extension source contract. |
-| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/skills.md` | Installed Pi docs | 2026-05-25 | Skill discovery, package skill resources, skill security warning. | Used for skill/package contract. |
+| `https://docs.x.ai/build/overview` | Official xAI docs | 2026-05-25 | Grok Build supports TUI, headless use, agent-protocol mode, install command, local auth/API-key paths. | Product-shape source. Runtime claims require package proof. |
+| `https://docs.x.ai/build/cli/headless-scripting` | Official xAI docs | 2026-05-25 | Headless `grok -p`, `--output-format plain/json/streaming-json`, agent-protocol `grok agent stdio`. | Launch-path source for future ADRs and tests. |
+| `https://docs.x.ai/build/enterprise` | Official xAI docs | 2026-05-25 | Auth methods, network hosts, config layers, permissions, sandbox profiles, data lifecycle. | Provider/config source. Credential values stay outside docs and tool output. |
+| `https://docs.x.ai/build/features/skills-plugins-marketplaces` | Official xAI docs | 2026-05-25 | Grok skills/plugins/hooks/subagents and compatibility surfaces. | Grok Build capability source for future package design. |
+| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/packages.md` | Installed Pi docs | 2026-05-25 | Pi package manifest, package security warning, install/update/package source behavior. | Local installed Pi package semantics for this workstation. |
+| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/extensions.md` | Installed Pi docs | 2026-05-25 | `pi.registerTool`, tool output truncation, `StringEnum`, extension permissions. | Extension source contract. |
+| `/opt/homebrew/lib/node_modules/@earendil-works/pi-coding-agent/docs/skills.md` | Installed Pi docs | 2026-05-25 | Skill discovery, package skill resources, skill security warning. | Skill/package contract. |
 
 ## Proof layers
 
-| Evidence layer | What it proves | What it does not prove | Minimum current command/source |
+| Evidence layer | Claim supported | Additional proof required for stronger claims | Minimum current command/source |
 | --- | --- | --- | --- |
-| Source docs | Intended package contract and denial posture | Pi loaded the package; Grok Build works | tracked root docs and `docs/` |
-| Extension source | Registered tool schema and implementation intent | Runtime tool visibility | `extensions/grok-build/index.ts` |
-| Skill source | Model guidance when loaded | Live implicit skill selection | `skills/pi-grok-build/SKILL.md` |
+| Source docs | Intended package contract and authority posture | Pi loader proof and runtime behavior | tracked root docs and `docs/` |
+| Extension source | Registered tool schema and implementation intent | Current runtime tool visibility | `extensions/grok-build/index.ts` |
+| Skill source | Guidance available when the skill is loaded | Live implicit skill selection | `skills/pi-grok-build/SKILL.md` |
 | `package.json.pi` manifest | Declared Pi resources | Installed or active runtime resources | `package.json` |
 | Static tests | Source/package-shape invariants | Runtime behavior | `npm test` |
 | npm pack dry-run | Tarball file list and metadata candidate | Published registry state or installed behavior | `npm run check:pack` |
-| npm registry metadata | Published version, dist-tags, tarball integrity | Source checkout parity, Pi runtime behavior | `npm view pi-grok-build ...` |
-| Pi loader proof | Pi discovered extension/skill resources for one invocation | Grok Build live behavior | documented runtime/tool-list proof |
+| npm registry metadata | Published version, dist-tags, tarball integrity | Source checkout parity and Pi runtime behavior | `npm view pi-grok-build ...` |
+| Pi loader proof | Pi discovered extension/skill resources for one invocation | Grok Build live behavior | current runtime/tool-list proof |
 | `grok_build doctor` | Candidate executable discovery for one invocation | Login, subscription, prompt behavior, sandbox/worktree safety, delegation | Pi tool call result |
-| No-prompt Grok Build probe | Future safe readiness if implemented | Prompt-carrying behavior | future explicit probe |
+| No-prompt Grok Build probe | Future readiness signal for one executable/profile | Prompt-carrying behavior | future explicit probe |
 | Prompt-carrying live run | Future authorized delegation for one case | General correctness or all capabilities | future explicit provider-use proof |
-| Artifact ledger | Retained output path/checksum/terminal state | Correctness without parent review | future package-owned artifact root |
-| Cleanup proof | Package-owned artifact deletion for one job | Grok account/auth/Pi package teardown | future cleanup receipt |
+| Artifact ledger | Retained output path/checksum/terminal state | Parent acceptance and validation | future package-owned artifact root |
+| Cleanup proof | Package-owned artifact deletion for one job | Provider account/auth changes or Pi package teardown | future cleanup receipt |
 
 ## Current validation proof target
 
@@ -42,9 +42,9 @@ This ledger separates source proof, npm/package proof, Pi loader proof, doctor p
 | `npm run check:pack` | npm dry-run packlist | pass |
 | `git diff --check` | whitespace | pass |
 
-## Live proof denial
+## Claims that require live proof
 
-Do not claim any of these from source, docs, npm metadata, or pack output alone:
+Capture current runtime evidence before claiming:
 
 - Pi active runtime loaded the extension;
 - a model can call `grok_build` in a specific session;
