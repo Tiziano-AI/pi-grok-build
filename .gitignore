@@ -1,0 +1,12 @@
+# Local Pi/runtime state
+.pi/
+
+# Dependencies and build outputs
+node_modules/
+dist/
+coverage/
+*.tgz
+
+# OS/editor noise
+.DS_Store
+*.swp

@@ -1,0 +1,56 @@
+{
+  "name": "pi-grok-build",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Pi extension for delegating to xAI Grok Build with Pi-native lifecycle, artifacts, and safety controls.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-extension",
+    "grok-build",
+    "grok",
+    "xai",
+    "coding-agent"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tiziano-AI/pi-grok-build.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tiziano-AI/pi-grok-build/issues"
+  },
+  "homepage": "https://github.com/Tiziano-AI/pi-grok-build#readme",
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs/**/*.md",
+    "extensions/**/*.ts",
+    "skills/**/*.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check:pack": "npm pack --dry-run --json",
+    "gate": "npm test && npm run check:pack && git diff --check"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": ">=0.74.0",
+    "@earendil-works/pi-coding-agent": ">=0.74.0",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions/grok-build/index.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  }
+}
