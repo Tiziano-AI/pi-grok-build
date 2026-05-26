@@ -1,8 +1,8 @@
 # Configuration
 
-Current `0.0.x` configuration scope is intentionally small: `grok_build doctor` reads `process.env.PATH` for executable-candidate discovery.
+Current `0.0.x` configuration scope is intentionally small: `grok_build doctor` and `grok_build preflight` read `process.env.PATH` for executable-candidate discovery.
 
-The bootstrap line introduces package-owned configuration with the future `start` contract.
+The bootstrap line introduces package-owned configuration with the future `start` contract. Current preflight reports that executable identity, consent, artifact, and output policies remain future launch gates.
 
 ## Future operator-owned config
 
@@ -34,7 +34,7 @@ Package config should be a small, typed operator surface. Model-facing tool argu
 
 ## Grok Build external config
 
-Official xAI docs checked on 2026-05-25 describe Grok Build config, auth, permissions, sandbox profiles, skills, plugins, hooks, and enterprise requirements. Those may inform a future `pi-grok-build` config design. Package docs should cite current official docs or observed runtime behavior for external Grok Build semantics.
+Official xAI docs checked on 2026-05-26 describe Grok Build config, auth, permissions, sandbox profiles, skills, plugins, hooks, and enterprise requirements. Those may inform a future `pi-grok-build` config design. Package docs should cite current official docs or observed runtime behavior for external Grok Build semantics.
 
 ## Config readback
 

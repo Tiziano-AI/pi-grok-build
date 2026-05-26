@@ -2,9 +2,9 @@
 
 ## Version and publication posture
 
-`0.0.1` was the name-reservation bootstrap release. `0.0.2` was the first public control-plane bootstrap.
+`0.0.1` was the name-reservation bootstrap release. `0.0.2` was the first public control-plane bootstrap. `0.0.3` is the current foundational npm default.
 
-Current source is `0.0.3`, the foundational positive-posture bootstrap candidate. It remains a pre-1.0 doctor-only package; publishing it as npm `latest` means current default install, not feature completeness. Agent-side publication requires explicit authorization for the exact package, version, and tag.
+Current source is `0.0.4`, the read-only readiness/preflight bootstrap candidate. It remains pre-1.0 and pre-operational; publishing it as npm `latest` means current default install, not feature completeness. Agent-side publication requires explicit authorization for the exact package, version, and tag.
 
 One version must align across:
 
@@ -54,12 +54,13 @@ Minimum non-provider Pi proof for a release candidate:
 1. Pi can discover the packaged skill command from the source or installed package.
 2. Pi can expose the `grok_build` tool from the package extension in a current runtime/tool-list proof.
 3. The `grok_build doctor` action can be called without launching Grok Build.
+4. The `grok_build preflight` action can be called and returns documented read-only preflight evidence.
 
 A failed or unavailable Pi runtime smoke is a proof gap unless it identifies a package-specific load error.
 
 ## Live Grok Build proof
 
-Bootstrap doctor releases require source/package and Pi resource proof only.
+Bootstrap doctor/preflight releases require source/package and Pi resource proof only.
 
 Future prompt-carrying proof requires explicit provider/subscription-use authorization and records:
 
@@ -75,17 +76,17 @@ Future prompt-carrying proof requires explicit provider/subscription-use authori
 After a human publishes a package version, verify without exposing secrets:
 
 ```bash
-npm view pi-grok-build name version dist-tags repository.url dist.integrity --json
+npm view pi-grok-build name version dist-tags repository.url dist.integrity gitHead --json
 npm pack pi-grok-build@<version> --dry-run --json
 ```
 
 Installed/loaded claims additionally require Pi package/runtime proof.
 
-For `0.0.3`, the intended current-default registry state is:
+For `0.0.4`, the intended current-default registry state is:
 
 ```text
-latest -> 0.0.3
-bootstrap -> 0.0.3
+latest -> 0.0.4
+bootstrap -> 0.0.4
 ```
 
 ## Rollback and teardown

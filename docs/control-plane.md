@@ -10,19 +10,20 @@ Local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` files are ignored on purpose. Pi 
 - Human-facing name: Pi Grok Build
 - Pi model-facing tool: `grok_build`
 - Pi skill: `pi-grok-build`
-- Current implemented action: `doctor`
+- Current implemented read-only actions: `doctor`, `preflight`
 - Current package phase: `0.0.x` bootstrap
 
 `pi-grok-build` packages a Pi extension and skill for supervising Grok Build from Pi. The package owns the Pi-facing tool contract, job authority, artifact discipline, and proof ladder.
 
 ## Current source truth
 
-`grok_build doctor` checks executable candidates and returns bootstrap status. It is a read-only package and environment discovery action.
+`grok_build doctor` reports package/environment discovery. `grok_build preflight` reports foundational read-only readiness evidence and deferred launch gates. Both actions are pre-operational: they do not launch Grok Build, send prompts, call providers, write artifacts, or mutate files.
 
 Current source scope:
 
 - package resource discovery through `package.json.pi`;
 - a source-inspectable extension entrypoint;
+- source-inspectable `doctor` and `preflight` actions;
 - a source-inspectable skill;
 - public docs for future operational contracts;
 - static tests and npm pack proof.

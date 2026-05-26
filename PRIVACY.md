@@ -2,15 +2,16 @@
 
 ## Current release
 
-`pi-grok-build@0.0.x` is local and stateless. It keeps the bootstrap interaction inside package/environment discovery.
+`pi-grok-build@0.0.x` is local and stateless. It keeps the bootstrap interaction inside package/environment discovery and foundational preflight evidence.
 
-The current `grok_build doctor` action returns:
+The current `grok_build doctor` and `grok_build preflight` actions return:
 
 - current Pi cwd;
 - whether candidate executables named `grok-build` or `grok` are executable on `PATH`;
-- bootstrap status text.
+- absolute candidate executable paths when a candidate is found;
+- bootstrap status, preflight checks, and deferred launch gates.
 
-It keeps Grok credential files, account files, shell histories, project source files, and provider state outside the current action.
+They keep Grok credential files, account files, shell histories, project source files, provider state, Grok Build process output, and package artifacts outside the current actions.
 
 ## Future retained evidence
 

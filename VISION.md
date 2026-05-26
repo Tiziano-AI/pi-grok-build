@@ -6,6 +6,7 @@ The product should feel obvious to a Pi caller:
 
 ```text
 doctor today
+preflight today
 
 future:
 start → status → result
@@ -16,7 +17,7 @@ Design commitments:
 
 - one Pi-native model-facing tool: `grok_build`
 - one source-inspectable package: `pi-grok-build`
-- honest bootstrap behavior with a safe doctor first-success path
+- honest bootstrap behavior with safe doctor and preflight paths
 - curated lifecycle actions instead of raw launch plumbing
 - explicit consent and operator-owned policy before provider/subscription use
 - bounded previews and retained artifacts for full output

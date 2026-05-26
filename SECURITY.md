@@ -2,14 +2,14 @@
 
 ## Bootstrap posture
 
-`pi-grok-build@0.0.x` is a read-only bootstrap. The current `grok_build doctor` action performs executable-candidate discovery and returns structured status.
+`pi-grok-build@0.0.x` is a read-only bootstrap. The current `grok_build doctor` action performs executable-candidate discovery and returns structured status. The current `grok_build preflight` action returns foundational readiness evidence and deferred launch gates.
 
 Current runtime behavior:
 
 - reads `PATH` entries for candidate names;
 - reports candidate paths when executable bits are present;
-- returns bootstrap status and next-step guidance;
-- keeps credentials, provider calls, shells, background jobs, and filesystem mutation outside the current action.
+- returns bootstrap status, preflight checks, and next-step guidance;
+- keeps credentials, provider calls, shells, background jobs, Grok Build process launch, artifacts, and filesystem mutation outside the current actions.
 
 Pi packages and extensions run with the user's local permissions. Treat installation as a source-trust decision.
 
@@ -21,17 +21,17 @@ The Pi model-facing tool is:
 grok_build
 ```
 
-Current accepted action:
+Current accepted read-only actions:
 
 ```text
-doctor
+doctor | preflight
 ```
 
 Future operational actions keep raw authority behind operator-owned configuration. The public tool schema should expose curated profile ids and job controls, while executable paths, raw launch flags, environment variables, credentials, auth methods, provider accounts, sandbox names, hook/plugin paths, and cleanup roots remain policy/config concerns.
 
 ## Executable discovery
 
-The doctor may report `grok-build` or `grok` candidates from `PATH`. That is candidate discovery.
+Doctor and preflight may report `grok-build` or `grok` candidates from `PATH`. That is candidate discovery.
 
 A future `start` implementation needs a stronger launch policy, such as:
 

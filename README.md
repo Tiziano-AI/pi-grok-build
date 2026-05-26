@@ -8,24 +8,25 @@ Pi package for bringing **xAI Grok Build** into Pi as a source-inspectable exten
 
 `pi-grok-build` is in the `0.0.x` bootstrap line.
 
-Published `0.0.1` reserved the package name and shipped the first source-inspectable doctor. Current source is the `0.0.3` foundational bootstrap candidate: current default install posture, still doctor-only and pre-operational.
+Published `0.0.3` is the current foundational npm default. Current source is the `0.0.4` read-only readiness/preflight candidate: still pre-operational, with `doctor` plus foundational `preflight` evidence.
 
 Current scope:
 
 - Pi package manifest with `pi.extensions` and `pi.skills`
-- read-only `grok_build` tool with `action: "doctor"`
+- read-only `grok_build` tool with `action: "doctor"` and `action: "preflight"`
 - `pi-grok-build` skill
-- package-shape tests and npm pack dry-run gate
+- package-shape and contract tests plus npm pack dry-run gate
 - public docs for capability, evidence, consent, security, release, and authority boundaries
 
-The doctor is the first-success path. Operational delegation is the next design phase.
+The doctor is the first-success package/environment path. Preflight is the read-only next-step proof before operational delegation.
 
 ## Product direction
 
-Grok Build is a terminal coding agent with interactive, headless, and agent-protocol modes. Pi Grok Build will provide a Pi-owned supervision layer around that product:
+Grok Build is a terminal coding agent with interactive, headless, and agent-protocol modes. Pi Grok Build provides a Pi-owned supervision layer around that product:
 
 - one model-facing Pi tool: `grok_build`
-- curated lifecycle actions for launch, status, results, cancellation, and cleanup
+- read-only bootstrap actions for discovery and preflight evidence
+- curated lifecycle actions for future launch, status, results, cancellation, and cleanup
 - operator-owned launch profiles and executable identity policy
 - explicit consent before prompt-carrying provider/subscription use
 - bounded previews with artifact paths for full evidence
@@ -53,13 +54,19 @@ pi -e /absolute/path/to/pi-grok-build
 
 ## First success today
 
-Ask Pi to use the `grok_build` tool with the only implemented action:
+Ask Pi to use the `grok_build` tool for package/environment discovery:
 
 ```json
 { "action": "doctor" }
 ```
 
-The doctor reports whether `grok-build` or `grok` is discoverable on `PATH`. Treat the result as executable-candidate evidence for that invocation. Operational readiness requires the stronger proof ladder in [Evidence ledger](docs/evidence.md).
+For foundational readiness evidence before any operational delegation design:
+
+```json
+{ "action": "preflight" }
+```
+
+The doctor reports whether `grok-build` or `grok` is discoverable on `PATH` and may include absolute candidate executable paths. Preflight returns a read-only checklist of executable-candidate evidence, current authority posture, and deferred launch gates. Treat both results as evidence for that invocation. Operational readiness requires the stronger proof ladder in [Evidence ledger](docs/evidence.md).
 
 ## Control-plane docs
 
@@ -96,4 +103,4 @@ git diff --check
 
 Pi packages run with the user's full local permissions. Review source before installing any Pi package, including this one.
 
-The bootstrap runtime scope is read-only candidate discovery with zero runtime dependencies, shell execution, network calls, credential reads, provider use, or filesystem mutation.
+The bootstrap runtime scope is read-only discovery and preflight evidence with zero non-peer package dependencies, shell execution, network calls, credential reads, provider use, Grok Build process launch, or filesystem mutation.

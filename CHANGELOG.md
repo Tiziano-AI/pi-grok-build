@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.4 - Unreleased
+
+- Add read-only `grok_build preflight` for foundational readiness evidence without launching Grok Build.
+- Keep `doctor` as the package/environment first-success path.
+- Document the preflight claim ceiling across the canonical control-plane corpus.
+- Add static contract tests for the action enum, narrow input schema, preflight authority fields, and package-local source behavior.
+
 ## 0.0.3 - 2026-05-26
 
 - Refine public product posture around what Pi Grok Build is and how the bootstrap works.

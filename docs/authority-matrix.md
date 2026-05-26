@@ -1,11 +1,12 @@
 # Authority Matrix
 
-This matrix defines how `pi-grok-build` admits authority. Current code implements only `doctor`; future rows become tests before operational release.
+This matrix defines how `pi-grok-build` admits authority. Current code implements read-only `doctor` and `preflight`; future rows become tests before operational release.
 
 | Request/state | Disposition | Required behavior | Rationale |
 | --- | --- | --- | --- |
 | `grok_build` with missing action | Allowed | Treat as `doctor` | Safe bootstrap default. |
 | `grok_build` with `action: "doctor"` | Allowed | Read-only PATH candidate check | Package/environment discovery only. |
+| `grok_build` with `action: "preflight"` | Allowed | Read-only readiness/preflight evidence | Pre-operational proof without Grok Build process launch. |
 | Operational action in `0.0.x` | Guarded | Return unsupported action | Operational lifecycle belongs to future releases. |
 | Raw Grok Build launch flags | Operator-owned | Accept only through future profile config | Keeps model-facing inputs stable and reviewable. |
 | Executable path | Operator-owned | Accept only through future trusted config or identity policy | Launching local binaries is an authority transfer. |

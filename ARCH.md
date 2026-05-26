@@ -5,12 +5,12 @@
 ```text
 Pi package manifest
   ├─ extension: extensions/grok-build/index.ts
-  │    └─ model-facing tool: grok_build { action: "doctor" }
+  │    └─ model-facing tool: grok_build { action: "doctor" | "preflight" }
   └─ skill root: skills/
        └─ skill: pi-grok-build
 ```
 
-The current tool performs read-only executable-candidate discovery. Operational delegation will be added only after the launch, consent, state, artifact, and proof contracts are implemented together.
+The current tool performs read-only package/environment discovery and foundational preflight evidence. Operational delegation will be added only after the launch, consent, state, artifact, and proof contracts are implemented together.
 
 ## Public surface
 
@@ -20,10 +20,10 @@ The canonical Pi model-facing surface is one tool:
 grok_build
 ```
 
-Implemented action:
+Implemented read-only actions:
 
 ```text
-doctor
+doctor | preflight
 ```
 
 Planned governed lifecycle actions:
@@ -39,7 +39,7 @@ Additional actions such as follow-up turns or change readback will be designed f
 | Layer | Owner | Current status |
 | --- | --- | --- |
 | Package manifest | `package.json` | Declares Pi extension and skill resources. |
-| Extension source | `extensions/grok-build/index.ts` | Registers read-only `grok_build doctor`. |
+| Extension source | `extensions/grok-build/index.ts` | Registers read-only `grok_build doctor` and `grok_build preflight`. |
 | Skill source | `skills/pi-grok-build/SKILL.md` | Teaches Pi agents the bootstrap boundary. |
 | Public docs | root docs and `docs/` | Define product, capability, proof, release, and authority contracts. |
 | Local operator notes | ignored `AGENTS.md`, `PLAN.md`, `HANDOFF.md` | Local checkout/session guidance only. |
@@ -75,4 +75,4 @@ grok_build status/result/cancel/cleanup
 
 ## External authority boundary
 
-Official xAI docs checked on 2026-05-25 describe Grok Build as usable through interactive, headless, and agent-protocol modes. Those are Grok Build capabilities. `pi-grok-build` adopts a capability only when this repo adds the corresponding source contract, implementation, and proof lane.
+Official xAI docs checked on 2026-05-26 describe Grok Build as usable through interactive, headless, and agent-protocol modes. They also document `grok inspect` as a discovery command. Those are Grok Build capabilities. `pi-grok-build` adopts a capability only when this repo adds the corresponding source contract, implementation, and proof lane.

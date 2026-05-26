@@ -1,6 +1,6 @@
 # Artifacts and Retention
 
-Current `0.0.x` doctor behavior is stateless: it creates zero package artifacts.
+Current `0.0.x` doctor and preflight behavior is stateless: it creates zero package artifacts.
 
 Future operational releases need retained evidence because Grok Build output, logs, status, and changes can exceed safe model-context limits.
 

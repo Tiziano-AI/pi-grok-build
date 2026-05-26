@@ -1,6 +1,6 @@
 ---
 name: pi-grok-build
-description: "Use when operating or designing the Pi-native xAI Grok Build integration. Today this bootstrap skill supports source-aware package guidance and the read-only grok_build doctor."
+description: "Use when operating or designing the Pi-native xAI Grok Build integration. Today this bootstrap skill supports source-aware package guidance plus read-only grok_build doctor and preflight actions."
 license: MIT
 ---
 
@@ -10,11 +10,12 @@ license: MIT
 
 Use this skill when the user asks Pi to operate, inspect, or extend the `pi-grok-build` package: a Pi-native integration for xAI Grok Build.
 
-Current bootstrap status: the package is source-inspectable and registers a read-only `grok_build` doctor tool.
+Current bootstrap status: the package is source-inspectable and registers a read-only `grok_build` tool with `doctor` and `preflight` actions.
 
 ## Operating scope
 
-- Use `grok_build` for package/environment discovery through the implemented `doctor` action.
+- Use `grok_build` with `action: "doctor"` for package/environment discovery.
+- Use `grok_build` with `action: "preflight"` for foundational read-only readiness evidence.
 - Require explicit live/provider-use authorization before launching Grok Build or sending prompt-carrying work to xAI/Grok.
 - Keep raw Grok Build flags, executable paths, env vars, credentials, and provider/account selectors behind operator-owned configuration.
 - Use inspected source before adding runtime dependencies.
@@ -22,13 +23,19 @@ Current bootstrap status: the package is source-inspectable and registers a read
 
 ## First success today
 
-Use the `grok_build` tool with the only implemented action:
+Use the `grok_build` tool for package/environment discovery:
 
 ```json
 { "action": "doctor" }
 ```
 
-Interpret the result as local executable-candidate evidence. Operational readiness requires the proof ladder in `docs/evidence.md`.
+Use preflight for foundational readiness evidence:
+
+```json
+{ "action": "preflight" }
+```
+
+Interpret both results as invocation-local evidence. Operational readiness requires the proof ladder in `docs/evidence.md`.
 
 ## Public docs to read before changes
 
@@ -52,4 +59,5 @@ The package should provide bounded previews, retained artifacts for full output,
 - A package manifest proves declared Pi resources.
 - npm metadata proves registry publication.
 - A doctor result proves local executable discovery for that invocation.
+- A preflight result proves package-local readiness evidence and deferred gates for that invocation.
 - A future live Grok Build run needs observed runtime output, retained artifacts, and explicit authorization for provider/subscription use.

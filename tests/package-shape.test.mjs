@@ -32,7 +32,7 @@ const requiredPublicDocs = [
 
 test("package identity and Pi manifest are canonical", () => {
 	assert.equal(pkg.name, "pi-grok-build");
-	assert.equal(pkg.version, "0.0.3");
+	assert.equal(pkg.version, "0.0.4");
 	assert.equal(pkg.private, undefined);
 	assert.equal(pkg.description, "Bootstrap Pi package for a source-inspectable xAI Grok Build integration.");
 	assert.deepEqual(pkg.pi.extensions, ["./extensions/grok-build/index.ts"]);
@@ -102,9 +102,12 @@ test("bootstrap surface is positive, Pi-native, and source-inspectable", () => {
 		.join("\n");
 	assert.match(corpus, /grok_build/);
 	assert.match(corpus, /doctor/);
+	assert.match(corpus, /preflight/);
 	assert.match(corpus, /source-inspectable/i);
+	assert.match(corpus, /absolute candidate executable paths/i);
 	assert.match(corpus, /Pi package/);
 	assert.match(corpus, /Grok Build/);
 	assert.doesNotMatch(corpus, new RegExp("Non" + "-goals", "i"));
 	assert.doesNotMatch(corpus, new RegExp("Reject" + "ed alternatives", "i"));
+	assert.doesNotMatch(corpus, /only implemented action/i);
 });
