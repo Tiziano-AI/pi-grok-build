@@ -1,6 +1,6 @@
 {
   "name": "pi-grok-build",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "Bootstrap Pi package for a source-inspectable xAI Grok Build integration.",
   "keywords": [

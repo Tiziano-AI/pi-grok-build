@@ -2,9 +2,9 @@
 
 ## Version and publication posture
 
-`0.0.1` was the name-reservation bootstrap release.
+`0.0.1` was the name-reservation bootstrap release. `0.0.2` was the first public control-plane bootstrap.
 
-Current source is `0.0.2` and remains a bootstrap candidate unless and until the human publishes it. Agent-side publication requires explicit authorization for the exact package, version, and tag.
+Current source is `0.0.3`, the foundational positive-posture bootstrap candidate. It remains a pre-1.0 doctor-only package; publishing it as npm `latest` means current default install, not feature completeness. Agent-side publication requires explicit authorization for the exact package, version, and tag.
 
 One version must align across:
 
@@ -12,6 +12,7 @@ One version must align across:
 - `CHANGELOG.md`
 - npm package candidate output
 - Git tag when a release is cut
+- npm dist-tags after publication
 
 ## Required source gates
 
@@ -79,6 +80,13 @@ npm pack pi-grok-build@<version> --dry-run --json
 ```
 
 Installed/loaded claims additionally require Pi package/runtime proof.
+
+For `0.0.3`, the intended current-default registry state is:
+
+```text
+latest -> 0.0.3
+bootstrap -> 0.0.3
+```
 
 ## Rollback and teardown
 

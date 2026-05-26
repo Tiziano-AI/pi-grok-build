@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.0.2 - Unreleased
+## 0.0.3 - 2026-05-26
+
+- Refine public product posture around what Pi Grok Build is and how the bootstrap works.
+- Rename the safety matrix to `docs/authority-matrix.md` and frame constraints as positive authority boundaries.
+- Keep the package clearly in the foundational `0.0.x` doctor-only line while preparing it to be the current npm default.
+- Refresh package-shape tests for the positive public surface.
+
+## 0.0.2 - 2026-05-25
 
 - Bootstrap the public control-plane docs: architecture, vision, security, privacy, terms, release, capabilities, evidence, authority, configuration, consent, artifacts, release provenance, and Pi tool ADR.
 - Move durable package policy out of tracked `AGENTS.md`; local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` are now ignored operator/session notes.

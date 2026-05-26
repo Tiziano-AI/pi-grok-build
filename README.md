@@ -8,7 +8,7 @@ Pi package for bringing **xAI Grok Build** into Pi as a source-inspectable exten
 
 `pi-grok-build` is in the `0.0.x` bootstrap line.
 
-Published `0.0.1` reserved the package name and shipped the first source-inspectable doctor. Current source prepares the next bootstrap candidate with the public control plane required before operational delegation.
+Published `0.0.1` reserved the package name and shipped the first source-inspectable doctor. Current source is the `0.0.3` foundational bootstrap candidate: current default install posture, still doctor-only and pre-operational.
 
 Current scope:
 

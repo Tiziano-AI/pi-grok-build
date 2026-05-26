@@ -25,11 +25,11 @@ git diff --check
 npm view pi-grok-build name version dist-tags repository.url dist.integrity --json
 ```
 
-The published `0.0.1` package proves name reservation and registry presence. Current source `0.0.2` needs a human publish action before registry claims can name that version.
+The published `0.0.1` and `0.0.2` packages prove prior bootstrap registry presence. Current source `0.0.3` needs a human publish action before registry claims can name that version.
 
 ## Dist-tags
 
-`0.0.x` releases are bootstrap releases. Prefer a non-production dist-tag such as `bootstrap` unless the human intentionally wants the package on `latest`.
+`0.0.x` releases are bootstrap releases. For the foundational current-default state, use both `latest` and `bootstrap` on `0.0.3`: `latest` marks the default install, while `0.0.x` and the docs communicate bootstrap maturity.
 
 Npm dist-tag changes are human-owned release actions and require explicit authorization.
 
