@@ -1,224 +1,194 @@
-/** Pi Grok Build bootstrap extension. */
+/** Pi Grok Build extension entrypoint. */
 
-import { accessSync, constants } from "node:fs";
-import { delimiter, isAbsolute, join, resolve } from "node:path";
-import { StringEnum } from "@earendil-works/pi-ai";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { Type } from "typebox";
+import type { ExtensionAPI, ExtensionContext, ToolResultEvent } from "@earendil-works/pi-coding-agent";
+import { selectedTurn } from "./src/ledger.ts";
+import { cancelAll, recentSessionDetails, runGrokBuild } from "./src/service.ts";
+import { doctor, preflight } from "./src/native.ts";
+import { isProfileId, profileTable } from "./src/profiles.ts";
+import { GrokBuildInputSchema } from "./src/schemas.ts";
+import { GrokBuildWidget, renderGrokBuildCall, renderGrokBuildResult } from "./src/rendering.ts";
+import type { GrokBuildDetails, GrokBuildInput } from "./src/types.ts";
 
-const PACKAGE_VERSION = "0.0.4";
-const ACTIONS = ["doctor", "preflight"] as const;
-const EXECUTABLE_CANDIDATES = ["grok-build", "grok"] as const;
-const DEFERRED_ACTIONS = ["start", "status", "result", "cancel", "cleanup"] as const;
+const WIDGET_KEY = "grok-build:fixed";
+const MESSAGE_TYPE = "grok-build.command";
 
-const GrokBuildInputSchema = Type.Object(
-	{
-		action: Type.Optional(StringEnum(ACTIONS, { description: "Bootstrap action. Use doctor for package/PATH discovery or preflight for read-only readiness evidence." })),
-	},
-	{ additionalProperties: false },
-);
-
-interface ExecutableProbe {
-	name: string;
-	found: boolean;
-	ambiguous: boolean;
-	path?: string;
+interface WidgetState {
+	cards: GrokBuildDetails[];
+	component: GrokBuildWidget | undefined;
 }
 
-interface DoctorDetails {
-	kind: "pi_grok_build";
-	action: "doctor";
-	packageVersion: string;
-	operational: false;
-	cwd: string;
-	executables: ExecutableProbe[];
-	next: string;
-}
-
-interface PreflightCheck {
-	id: string;
-	status: "pass" | "warn" | "deferred";
-	message: string;
-}
-
-interface PreflightDetails {
-	kind: "pi_grok_build";
-	action: "preflight";
-	packageVersion: string;
-	operational: false;
-	cwd: string;
-	claim: string;
-	checks: PreflightCheck[];
-	authority: {
-		providerUse: false;
-		networkUse: false;
-		promptCarryingDelegation: false;
-		filesystemMutation: false;
-		artifactsWritten: false;
-		rawLaunchFieldsAccepted: false;
-	};
-	executable: {
-		candidateDiscovered: boolean;
-		candidateCount: number;
-		ambiguousCandidateCount: number;
-		trustedIdentity: false;
-		launched: false;
-		candidates: ExecutableProbe[];
-	};
-	deferredActions: typeof DEFERRED_ACTIONS[number][];
-	gaps: string[];
-}
-
+/** Register the Pi-native Grok Build tool, slash command, and fixed widget. */
 export default function piGrokBuildExtension(pi: ExtensionAPI) {
+	registerPiGrokBuildExtension(pi);
+}
+
+export function registerPiGrokBuildExtension(pi: ExtensionAPI) {
+	const widgets = new Map<string, WidgetState>();
+	pi.on("session_shutdown", (event: { reason?: string }, ctx) => {
+		cancelAll(event.reason ? `Parent Pi session shutdown: ${event.reason}.` : "Parent Pi session shutdown.");
+		clearWidget(ctx, widgets);
+	});
+	pi.on("tool_result", (event) => grokBuildToolResultErrorOverride(event));
 	pi.registerTool({
 		name: "grok_build",
 		label: "Grok Build",
-		description: "Read-only bootstrap tool for the Pi Grok Build package. doctor checks package/environment discovery; preflight returns foundational readiness evidence without launching Grok Build.",
-		promptSnippet: "Read-only Pi Grok Build bootstrap tool: action doctor for discovery, action preflight for foundational readiness evidence.",
+		description: "Supervise xAI Grok Build through one Pi lifecycle tool backed by grok agent stdio: start, send, status, result, changes, cancel, cleanup. Operator diagnostics are slash-command only.",
+		promptSnippet: "Supervise Grok Build sessions: start, send, status, result, changes, cancel, cleanup.",
 		promptGuidelines: [
-			"Use grok_build with action doctor to inspect whether a Grok Build executable candidate is discoverable on PATH.",
-			"Use grok_build with action preflight for read-only readiness evidence before any operational Grok Build delegation design.",
-			"Treat grok_build doctor and preflight output as package/environment evidence. Operational delegation needs the proof ladder in pi-grok-build docs.",
+			"Use grok_build with action start only after explicit live/provider-use authorization; set confirm_provider_use:true only for that authorized prompt-carrying run.",
+			"Use grok_build status/result with wait_seconds for bounded waits; result reports completed answers and terminal failed/cancelled turn errors without requiring a separate status call.",
+			"Use grok_build changes only for worktree-edit or grounded-edit sessions after no turn is active; changes reads the assigned pi-grok-build worktree, not the parent repo.",
+			"Use grok_build send for same-session follow-up after explicit live/provider-use authorization; use cancel for explicit stop and cleanup only for package-owned retained evidence.",
+			"Do not ask grok_build for doctor or preflight; those are human /grok-build slash diagnostics only.",
 		],
 		parameters: GrokBuildInputSchema,
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const action = params.action ?? "doctor";
-			const executables = EXECUTABLE_CANDIDATES.map((name) => ({
-				name,
-				ambiguous: name === "grok",
-				...findExecutableOnPath(name),
-			}));
-			if (action === "doctor") return buildDoctorResult(executables, ctx.cwd);
-			if (action === "preflight") return buildPreflightResult(executables, ctx.cwd);
-			throw new Error(`Unsupported grok_build action: ${String(action)}`);
+			const result = await runGrokBuild(params as GrokBuildInput, ctx.cwd);
+			updateWidget(ctx, widgets, [result.details, ...recentSessionDetails()]);
+			return result;
+		},
+		renderCall: renderGrokBuildCall,
+		renderResult: renderGrokBuildResult,
+	});
+	pi.registerCommand("grok-build", {
+		description: "Operate Pi Grok Build diagnostics and sessions.",
+		getArgumentCompletions(prefix: string) {
+			const commands = ["doctor", "preflight", "jobs", "status", "result", "changes", "cancel", "cleanup", "start", "send", "clear"];
+			const matches = commands.filter((command) => command.startsWith(prefix.trim()));
+			return matches.length > 0 ? matches.map((value) => ({ value, label: value })) : null;
+		},
+		handler: async (args: string, ctx: ExtensionContext) => {
+			const details = await runSlashCommand(args, ctx);
+			if (details.action === "clear") {
+				clearWidget(ctx, widgets);
+				ctx.ui.notify("Pi Grok Build widget cleared.", "info");
+				return;
+			}
+			updateWidget(ctx, widgets, [details, ...recentSessionDetails()]);
+			pi.sendMessage<GrokBuildDetails>({ customType: MESSAGE_TYPE, content: commandMessage(details), display: true, details }, { triggerTurn: false });
 		},
 	});
 }
 
-function buildDoctorResult(executables: ExecutableProbe[], cwd: string) {
-	const first = executables.find((candidate) => candidate.found);
-	const candidateLine = first
-		? `Found executable candidate: ${first.name} at ${first.path}${first.ambiguous ? " (ambiguous generic command)" : ""}`
-		: "No grok-build or grok executable was found on PATH.";
-	const lines = [
-		"pi-grok-build bootstrap doctor",
-		candidateLine,
-		"Scope: package/environment discovery for this invocation.",
-		"Current implementation: read-only doctor and preflight status. Operational delegation is a later phase.",
-		"Next implementation step: accept the explicit Pi-native lifecycle contract before start/status/result/cancel/cleanup.",
-	];
-	const details: DoctorDetails = {
-		kind: "pi_grok_build",
-		action: "doctor",
-		packageVersion: PACKAGE_VERSION,
-		operational: false,
-		cwd,
-		executables,
-		next: "Use action preflight for foundational readiness evidence. Implement start/status/result/cancel/cleanup only after consent, artifact, executable-identity, and launch-policy contracts are accepted.",
-	};
-	return { content: [{ type: "text" as const, text: lines.join("\n") }], details };
+export function grokBuildToolResultErrorOverride(event: ToolResultEvent): { isError: true } | undefined {
+	if (event.toolName !== "grok_build") return undefined;
+	const details = event.details as GrokBuildDetails | undefined;
+	return details?.kind === "pi_grok_build" && details.ok === false ? { isError: true } : undefined;
 }
 
-function buildPreflightResult(executables: ExecutableProbe[], cwd: string) {
-	const found = executables.filter((candidate) => candidate.found);
-	const ambiguous = found.filter((candidate) => candidate.ambiguous);
-	const checks: PreflightCheck[] = [
-		{
-			id: "package_contract",
-			status: "pass",
-			message: "grok_build exposes read-only doctor and preflight actions.",
-		},
-		{
-			id: "executable_candidate",
-			status: found.length === 0 ? "warn" : ambiguous.length > 0 ? "warn" : "pass",
-			message:
-				found.length === 0
-					? "No grok-build or grok executable candidate was found on PATH."
-					: ambiguous.length > 0
-						? "An executable candidate was found, including the ambiguous generic grok command."
-						: "A non-ambiguous grok-build executable candidate was found on PATH.",
-		},
-		{
-			id: "executable_identity_policy",
-			status: "deferred",
-			message: "Accepted executable identity policy is required before launch.",
-		},
-		{
-			id: "consent_policy",
-			status: "deferred",
-			message: "Prompt-carrying Grok Build launch requires explicit consent or operator preauthorization.",
-		},
-		{
-			id: "artifact_policy",
-			status: "deferred",
-			message: "Operational job artifact root and retention policy remain deferred.",
-		},
-		{
-			id: "provider_proof",
-			status: "deferred",
-			message: "Provider, subscription, auth, and prompt behavior require future live proof.",
-		},
-	];
-	const gaps = [
-		...(found.length === 0 ? ["discover or configure a Grok Build executable candidate"] : []),
-		...(ambiguous.length > 0 ? ["accepted identity policy for the ambiguous grok executable candidate"] : []),
-		"accepted executable identity policy",
-		"consent/preauthorization contract",
-		"artifact root/job ownership contract",
-		"bounded output contract",
-		"live provider proof",
-	];
-	const details: PreflightDetails = {
-		kind: "pi_grok_build",
-		action: "preflight",
-		packageVersion: PACKAGE_VERSION,
-		operational: false,
-		cwd,
-		claim: "Read-only preflight evidence. No provider use, network use, prompt launch, filesystem mutation, or artifacts.",
-		checks,
-		authority: {
-			providerUse: false,
-			networkUse: false,
-			promptCarryingDelegation: false,
-			filesystemMutation: false,
-			artifactsWritten: false,
-			rawLaunchFieldsAccepted: false,
-		},
-		executable: {
-			candidateDiscovered: found.length > 0,
-			candidateCount: found.length,
-			ambiguousCandidateCount: ambiguous.length,
-			trustedIdentity: false,
-			launched: false,
-			candidates: executables,
-		},
-		deferredActions: [...DEFERRED_ACTIONS],
-		gaps,
-	};
-	const lines = [
-		"pi-grok-build bootstrap preflight",
-		found.length > 0 ? `Executable candidates found: ${found.length}` : "Executable candidates found: 0",
-		"Scope: read-only foundational readiness evidence for this invocation.",
-		"Authority: package-local check with provider use, network use, prompt launch, filesystem mutation, artifacts, and Grok Build process launch all outside this action.",
-		"Operational delegation remains deferred until the lifecycle contract is accepted.",
-	];
-	return { content: [{ type: "text" as const, text: lines.join("\n") }], details };
+async function runSlashCommand(args: string, ctx: ExtensionContext): Promise<GrokBuildDetails> {
+	const tokens = splitArgs(args);
+	const command = tokens[0] ?? "doctor";
+	if (command === "doctor") return diagnosticDetails("doctor", ctx.cwd);
+	if (command === "preflight") return diagnosticDetails("preflight", ctx.cwd);
+	if (command === "jobs") return { kind: "pi_grok_build", action: "status", ok: true, message: "Recent pi-grok-build jobs." };
+	if (command === "clear") return { kind: "pi_grok_build", action: "clear", ok: true, message: "Widget cleared." };
+	if (command === "status" || command === "result" || command === "changes" || command === "cancel" || command === "cleanup") return runSessionSlash(command, tokens.slice(1), ctx.cwd);
+	if (command === "start") return runStartSlash(tokens.slice(1), ctx);
+	if (command === "send") return runSendSlash(tokens.slice(1), ctx);
+	return { kind: "pi_grok_build", action: "preflight", ok: false, error: { code: "slash_command_unknown", message: `Unknown /grok-build command: ${command}` } };
 }
 
-function findExecutableOnPath(name: string): Omit<ExecutableProbe, "name"> {
-	for (const entry of (process.env.PATH ?? "").split(delimiter)) {
-		if (!entry || !isAbsolute(entry)) continue;
-		const candidate = resolve(join(entry, name));
-		if (isExecutable(candidate)) return { found: true, path: candidate };
+function diagnosticDetails(action: "doctor" | "preflight", cwd: string): GrokBuildDetails {
+	const diagnostic = action === "doctor" ? doctor(cwd) : preflight(cwd);
+	return { kind: "pi_grok_build", action, ok: true, diagnostic, message: diagnostic.next };
+}
+
+async function runSessionSlash(command: "status" | "result" | "changes" | "cancel" | "cleanup", args: string[], cwd: string): Promise<GrokBuildDetails> {
+	const session = args[0];
+	if (!session) return { kind: "pi_grok_build", action: command, ok: false, error: { code: "session_required", message: `/grok-build ${command} requires a session handle.` } };
+	const input = command === "status"
+		? { action: "status" as const, session, preview: true }
+		: command === "result"
+			? { action: "result" as const, session, wait_seconds: 0, preview: true }
+			: command === "changes"
+				? { action: "changes" as const, session, preview: true }
+				: command === "cancel"
+					? { action: "cancel" as const, session, reason: args.slice(1).join(" ") || undefined }
+					: { action: "cleanup" as const, session };
+	return (await runGrokBuild(input, cwd)).details;
+}
+
+async function runStartSlash(args: string[], ctx: ExtensionContext): Promise<GrokBuildDetails> {
+	const separator = args.indexOf("--");
+	const profile = args[0] && isProfileId(args[0]) ? args[0] : "local-review";
+	const task = separator >= 0 ? args.slice(separator + 1).join(" ") : args.slice(profile === args[0] ? 1 : 0).join(" ");
+	if (!task.trim()) return { kind: "pi_grok_build", action: "start", ok: false, error: { code: "task_required", message: "/grok-build start requires a task. Example: /grok-build start local-review -- inspect this repo" } };
+	const confirmed = await confirmProviderUse(ctx, "start", task);
+	if (!confirmed) return { kind: "pi_grok_build", action: "start", ok: false, error: { code: "provider_use_not_confirmed", message: "Grok provider use was not confirmed." } };
+	return (await runGrokBuild({ action: "start", cwd: ctx.cwd, task, profile, confirm_provider_use: true }, ctx.cwd)).details;
+}
+
+async function runSendSlash(args: string[], ctx: ExtensionContext): Promise<GrokBuildDetails> {
+	const session = args[0];
+	const separator = args.indexOf("--");
+	const task = separator >= 0 ? args.slice(separator + 1).join(" ") : args.slice(1).join(" ");
+	if (!session || !task.trim()) return { kind: "pi_grok_build", action: "send", ok: false, error: { code: "session_and_task_required", message: "/grok-build send requires a session and task. Example: /grok-build send g1 -- continue with X" } };
+	const confirmed = await confirmProviderUse(ctx, "send", task);
+	if (!confirmed) return { kind: "pi_grok_build", action: "send", ok: false, error: { code: "provider_use_not_confirmed", message: "Grok provider use was not confirmed." } };
+	return (await runGrokBuild({ action: "send", session, task, confirm_provider_use: true }, ctx.cwd)).details;
+}
+
+async function confirmProviderUse(ctx: ExtensionContext, action: "start" | "send", task: string): Promise<boolean> {
+	if (!ctx.hasUI) return false;
+	return ctx.ui.confirm(`Launch Grok ${action}?`, `This sends prompt-carrying work to Grok/xAI. Task: ${task.slice(0, 240)}`);
+}
+
+function updateWidget(ctx: ExtensionContext, widgets: Map<string, WidgetState>, details: GrokBuildDetails[]): void {
+	if (!ctx.hasUI) return;
+	const sessionId = ctx.sessionManager.getSessionId();
+	let state = widgets.get(sessionId);
+	if (!state) {
+		state = { cards: [], component: undefined };
+		widgets.set(sessionId, state);
 	}
-	return { found: false };
+	state.cards = compactWidgetDetails(details);
+	if (state.component) {
+		state.component.setDetails(state.cards);
+		return;
+	}
+	ctx.ui.setWidget(WIDGET_KEY, (tui, theme) => {
+		const component = new GrokBuildWidget(state?.cards ?? [], theme, () => tui.requestRender());
+		if (state) state.component = component;
+		return component;
+	});
 }
 
-function isExecutable(path: string): boolean {
-	try {
-		accessSync(path, constants.X_OK);
-		return true;
-	} catch {
-		return false;
+function clearWidget(ctx: ExtensionContext, widgets: Map<string, WidgetState>): void {
+	const sessionId = ctx.sessionManager.getSessionId();
+	widgets.delete(sessionId);
+	if (ctx.hasUI) ctx.ui.setWidget(WIDGET_KEY, undefined);
+}
+
+function compactWidgetDetails(details: GrokBuildDetails[]): GrokBuildDetails[] {
+	const seen = new Set<string>();
+	const output: GrokBuildDetails[] = [];
+	for (const detail of details) {
+		const key = detail.session?.session ?? `${detail.action}:${detail.diagnostic?.action ?? detail.error?.code ?? output.length}`;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		output.push(detail);
+		if (output.length >= 6) break;
 	}
+	return output;
+}
+
+function commandMessage(details: GrokBuildDetails): string {
+	if (details.diagnostic) return [`# /grok-build ${details.diagnostic.action}`, "", details.diagnostic.next].join("\n");
+	if (!details.ok) return [`# /grok-build ${details.action}`, "", `Error: ${details.error?.code ?? "error"} - ${details.error?.message ?? "unknown"}`].join("\n");
+	if (details.cleanup) return [`# /grok-build cleanup`, "", `Deleted paths: ${details.cleanup.deleted_paths.length}`].join("\n");
+	if (!details.session) return [`# /grok-build ${details.action}`, "", details.message ?? "OK"].join("\n");
+	const turn = details.turn ?? selectedTurn(details.session);
+	const lines = [`# /grok-build ${details.action}`, "", `Session ${details.session.session}: ${details.session.status}`, `Cursor: ${details.session.event_cursor}`];
+	if (turn) lines.push(`Turn: ${turn.id} ${turn.state}`);
+	if (turn?.media_artifacts?.length) lines.push("", "Media artifacts:", ...turn.media_artifacts.map((artifact) => `${artifact.id} ${artifact.kind} ${artifact.path}`));
+	return lines.join("\n");
+}
+
+function splitArgs(args: string): string[] {
+	return args.trim().split(/\s+/).filter(Boolean);
+}
+
+export function grokBuildProfilesForDocs() {
+	return profileTable();
 }

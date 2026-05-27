@@ -1,65 +1,34 @@
-# Pi Grok Build Control Plane
+# Control plane
 
-This is the durable public control plane for `pi-grok-build`.
+`pi-grok-build` has one model control plane and one human operator surface.
 
-Local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` files are ignored on purpose. Pi may load them as local checkout/session notes, but stable package policy belongs in tracked source docs.
+## Identity
 
-## Product identity
+- Package: `pi-grok-build`
+- Tool: `grok_build`
+- Skill: `pi-grok-build`
+- Runtime: `grok agent stdio`
+- Command: `/grok-build`
+- Widget: `grok-build:fixed`
 
-- Package name: `pi-grok-build`
-- Human-facing name: Pi Grok Build
-- Pi model-facing tool: `grok_build`
-- Pi skill: `pi-grok-build`
-- Current implemented read-only actions: `doctor`, `preflight`
-- Current package phase: `0.0.x` bootstrap
+## Model-facing actions
 
-`pi-grok-build` packages a Pi extension and skill for supervising Grok Build from Pi. The package owns the Pi-facing tool contract, job authority, artifact discipline, and proof ladder.
-
-## Current source truth
-
-`grok_build doctor` reports package/environment discovery. `grok_build preflight` reports foundational read-only readiness evidence and deferred launch gates. Both actions are pre-operational: they do not launch Grok Build, send prompts, call providers, write artifacts, or mutate files.
-
-Current source scope:
-
-- package resource discovery through `package.json.pi`;
-- a source-inspectable extension entrypoint;
-- source-inspectable `doctor` and `preflight` actions;
-- a source-inspectable skill;
-- public docs for future operational contracts;
-- static tests and npm pack proof.
-
-## Future contract discipline
-
-Before any operational action is implemented, the public docs and tests must define:
-
-- exact action schema;
-- state machine and terminal states;
-- job id ownership;
-- consent policy;
-- executable identity and launch policy;
-- cwd/worktree policy;
-- artifact root and retention;
-- bounded model-facing output;
-- cancellation and cleanup ownership;
-- source/live proof requirements;
-- authority rows for every raw or ambiguous launch path.
-
-## Validation expectations
-
-Bootstrap source gates:
-
-```bash
-npm test
-npm run check:pack
-git diff --check
+```text
+start | send | status | result | changes | cancel | cleanup
 ```
 
-Runtime and live claims require stronger proof named in [Evidence ledger](evidence.md). Source files, docs, npm metadata, package manifests, and dry-run packlists prove source/package state only.
+`doctor` and `preflight` are slash/operator diagnostics only.
 
-## Development posture
+## Surface split
 
-- Documentation/control-plane updates precede runtime authority expansion.
-- Keep the model-facing surface small.
-- Prefer one canonical owner for every action, state, config key, artifact path, and proof lane.
-- Use inspected source for runtime dependencies.
-- Treat Grok Build output as evidence until Pi or the human accepts it.
+| Surface | Audience | Purpose |
+| --- | --- | --- |
+| `grok_build` | parent model | typed lifecycle calls with bounded output |
+| `/grok-build` | human/operator | diagnostics, confirmations, shortcuts, widget control |
+| fixed widget | human/operator | compact active/failure/diagnostic state |
+| artifact ledger | package/runtime | retained answers, inputs, media, events, and changes |
+| docs/tests | maintainers and users | public contract and validation gates |
+
+## Ownership
+
+The package owns session handles, assigned worktrees, ACP process supervision, artifact paths, and cleanup. The parent Pi session or human owns provider-use authorization, output acceptance, validation, commits, credentials, and publication.

@@ -1,38 +1,33 @@
-# ADR 0001: Name and product boundary
+# ADR 0001: Name and boundary
 
 ## Status
 
-Accepted for bootstrap.
+Accepted.
 
 ## Decision
 
-Use the unscoped npm package and repository name `pi-grok-build`.
+The package is named `pi-grok-build`.
 
-Use these public identities:
+Public surfaces:
 
-- npm package: `pi-grok-build`
-- GitHub repository: `Tiziano-AI/pi-grok-build`
-- display name: Pi Grok Build
-- Pi tool: `grok_build`
-- Pi skill: `pi-grok-build`
+- model-facing tool: `grok_build`;
+- human slash command: `/grok-build`;
+- skill: `pi-grok-build`;
+- fixed widget key: `grok-build:fixed`.
 
-The package is a Pi-native integration for xAI Grok Build.
+The package supervises Grok Build through the locally installed `grok agent stdio` ACP runtime.
 
-## Rationale
+## Boundary
 
-`pi-grok-build` follows common Pi package naming: `pi-` plus the capability. It preserves the official product phrase Grok Build and is specific enough to describe the package's intended surface.
+`pi-grok-build` owns:
 
-The first published package version, `0.0.1`, is a source-inspectable bootstrap. It reserves the name and exposes a read-only doctor tool while the lifecycle contract is designed. Later `0.0.x` releases add read-only preflight evidence while keeping operational lifecycle work deferred.
+- typed lifecycle schema;
+- curated profile policy;
+- session, turn, and event records;
+- package-owned artifact roots;
+- assigned git worktrees for write-capable profiles;
+- local media input admission;
+- copied generated media artifacts;
+- slash diagnostics and fixed widget state.
 
-## Boundaries
-
-- Pi integration uses Pi package, extension, tool, and skill APIs.
-- Raw Grok Build launch policy and account/auth posture stay behind operator-owned configuration.
-- Prompt-carrying Grok Build launches require an explicit future consent contract.
-- Runtime dependencies must have inspectable source before adoption.
-
-## Consequences
-
-Bootstrap releases should be clearly labeled as bootstrap/name-reservation releases. A non-production npm dist-tag such as `bootstrap` is preferred unless the human intentionally wants a version to be the default `latest` install.
-
-The mature release can later add lifecycle actions to `grok_build` while keeping `doctor` as the safe first-success probe and `preflight` as foundational readiness evidence.
+It does not own raw xAI APIs, Grok credentials, human acceptance of output, commits, publication, or destructive repository decisions.

@@ -1,41 +1,35 @@
 # Configuration
 
-Current `0.0.x` configuration scope is intentionally small: `grok_build doctor` and `grok_build preflight` read `process.env.PATH` for executable-candidate discovery.
+The model-facing configuration is intentionally small. The model chooses a profile and passes a task; the package owns launch policy.
 
-The bootstrap line introduces package-owned configuration with the future `start` contract. Current preflight reports that executable identity, consent, artifact, and output policies remain future launch gates.
+## State root
 
-## Future operator-owned config
+Resolution order:
 
-A future operational release should define one package-owned config contract before implementing `start`.
+1. `PI_GROK_BUILD_HOME`;
+2. `PI_CODING_AGENT_DIR/pi-grok-build`;
+3. `~/.pi/agent/pi-grok-build`.
 
-Possible operator-owned fields:
+## Profiles
 
-| Field family | Model-facing? | Purpose |
-| --- | ---: | --- |
-| executable profile/path | No | Select and verify the Grok Build executable to launch. |
-| launch profile | Model selects curated id only | Map to allowed Grok Build mode/flags. |
-| consent/preauthorization | No | Record whether prompt-carrying use may proceed noninteractively. |
-| cwd roots | No | Restrict delegated work to admitted repositories. |
-| read-only/write profile | Model selects curated id only | Separate review from worktree mutation. |
-| output limits | No | Bound status/result previews. |
-| artifact root/retention | No | Own retained evidence and cleanup. |
-| provider/auth posture | No | Reference local auth mode without storing or exposing secret values. |
+Allowed profile ids:
 
-## Package config boundaries
+```text
+local-review | grounded-review | deep-research | worktree-edit | grounded-edit | media
+```
 
-Package config should be a small, typed operator surface. Model-facing tool arguments should stay focused on curated action/profile/job choices while these authority sources remain in operator policy:
+There is no `profiles.*.worktree` knob. Write isolation comes from the profile and is implemented with package-owned assigned worktrees.
 
-- raw launch flags;
-- environment variables;
-- arbitrary executable paths;
-- credentials or auth file contents;
-- provider account selectors;
-- cleanup roots.
+## Consent field
 
-## Grok Build external config
+`start` and `send` require:
 
-Official xAI docs checked on 2026-05-26 describe Grok Build config, auth, permissions, sandbox profiles, skills, plugins, hooks, and enterprise requirements. Those may inform a future `pi-grok-build` config design. Package docs should cite current official docs or observed runtime behavior for external Grok Build semantics.
+```json
+{ "confirm_provider_use": true }
+```
 
-## Config readback
+That field is a receipt for current explicit authorization or a specific operator preauthorization policy. Package presence, PATH discovery, diagnostics, and prior runs are not consent.
 
-A mature release should include a safe config readback surface that reports origins, selected profile ids, and non-secret policy posture. Token values, API keys, auth file contents, and provider account secrets stay outside model-facing output.
+## Raw Grok knobs
+
+The schema does not accept arbitrary executable paths, argv, auth files, environment variables, worktree labels, or provider payloads. Curated profiles compile to Grok argv inside the extension.

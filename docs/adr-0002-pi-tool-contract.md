@@ -1,55 +1,34 @@
-# ADR 0002: Pi-native tool contract
+# ADR 0002: Pi tool contract
 
 ## Status
 
-Accepted for bootstrap.
+Accepted.
 
 ## Decision
 
-`pi-grok-build` exposes one Pi model-facing tool:
+`pi-grok-build` exposes one model-facing Pi tool:
 
 ```text
 grok_build
 ```
 
-The implemented bootstrap actions are:
+The action set is:
 
 ```text
-doctor | preflight
+start | send | status | result | changes | cancel | cleanup
 ```
 
-Future operational work extends this tool through explicit lifecycle actions.
-
-Potential lifecycle actions are:
-
-```text
-start | status | result | cancel | cleanup
-```
-
-`changes`, follow-up/steering, and worktree-edit flows require later ADRs after Grok Build behavior is revalidated and a Pi-native user experience is designed.
+`doctor` and `preflight` are `/grok-build` human diagnostics only. They are intentionally absent from the `grok_build` schema.
 
 ## Rationale
 
-Pi packages support native extension tools and skills. A single tool keeps the model-facing surface small, lets the package own job authority consistently, and keeps raw executable/provider/worktree power behind operator-owned policy.
+A single lifecycle tool keeps model authority small. The parent model can start work, wait, inspect, send a follow-up, read candidate diffs, stop a run, and remove retained evidence without gaining raw launch or credential authority.
 
-Official xAI docs checked on 2026-05-26 describe multiple Grok Build interfaces: interactive terminal use, headless execution, `grok inspect`, and an agent-protocol mode. This ADR reserves the Pi tool shape while launch-path selection stays behind future evidence and consent.
-
-## Scope
-
-- Pi-facing tool contract: `grok_build`.
-- Bootstrap first-success action: `doctor`.
-- Bootstrap foundational readiness action: `preflight`.
-- Operational actions: added only with state, consent, artifact, and proof contracts.
-- Operator-owned policy: executable identity, launch profile, provider/auth posture, cwd/worktree posture, output limits, and retention.
-
-## 0.0.4 update
-
-`0.0.4` adds `preflight` as a second read-only bootstrap action. It returns package-local readiness evidence and deferred gates without launching Grok Build. Operational lifecycle actions remain deferred.
+Diagnostics are useful to humans, but they do not belong in the model control plane.
 
 ## Consequences
 
-- `doctor` remains safe and read-only.
-- `preflight` remains safe, read-only, and pre-operational.
-- Any future action must fit the authority matrix and source/live evidence ladder.
-- Operator config owns launch policy and raw Grok Build knobs.
-- Parent Pi remains final authority for acceptance, validation, commits, publication, and claims.
+- `start` and `send` require explicit provider-use confirmation.
+- `changes` works only for assigned-worktree edit profiles.
+- Slash commands and the widget wrap the same service and ledger.
+- Any future model-facing action requires docs, tests, authority review, and proof.

@@ -1,40 +1,45 @@
-# Artifacts and Retention
+# Artifacts and retention
 
-Current `0.0.x` doctor and preflight behavior is stateless: it creates zero package artifacts.
+`pi-grok-build` keeps model output compact and stores full evidence as local artifacts.
 
-Future operational releases need retained evidence because Grok Build output, logs, status, and changes can exceed safe model-context limits.
+## State root
 
-## Future artifact contract
+Default:
 
-A mature release should create one package-owned artifact root. Every job should have an opaque job id and a dedicated directory below that root.
+```text
+~/.pi/agent/pi-grok-build
+```
 
-Required artifacts for future prompt-carrying jobs:
+Overrides:
 
-| Artifact | Purpose |
-| --- | --- |
-| `job.json` | Non-secret job metadata, state, timestamps, cwd, profile, consent receipt. |
-| `events.jsonl` | Bounded/material event stream or normalized status events. |
-| `result.md` | Final answer text when available. |
-| `receipt.json` | Terminal state, exit/cancel/timeout proof, output limits, redaction status. |
-| `stdout.log` / `stderr.log` | Full retained process output when safe and redacted. |
-| `changes.json` / `changes.diff` | Future actual filesystem/git readback for write-capable jobs. |
+```text
+PI_GROK_BUILD_HOME
+PI_CODING_AGENT_DIR/pi-grok-build
+```
 
-## Output limits
+## Session files
 
-Model-facing tool results must stay bounded. Large output should be truncated and point to a retained artifact path. Truncation policy should follow Pi extension guidance: keep model context small, clearly label truncation, and preserve full evidence when safe.
+A session can contain:
 
-## Cleanup authority
+```text
+sessions/<internal-id>/session.json
+sessions/<internal-id>/events.jsonl
+sessions/<internal-id>/artifacts/turns/<turn>/answer.md
+sessions/<internal-id>/artifacts/turns/<turn>/inputs/*
+sessions/<internal-id>/artifacts/turns/<turn>/media/*
+sessions/<internal-id>/artifacts/changes.json
+sessions/<internal-id>/artifacts/changes.diff
+sessions/<internal-id>/artifacts/execution-worktree/
+```
 
-Future `cleanup` is package-scoped. It addresses package-owned artifacts for the selected job and leaves other authority domains to their owners:
+The assigned worktree exists only for write-capable profiles.
 
-- files outside the package artifact root;
-- symlink escape targets;
-- Grok account/auth state;
-- arbitrary Grok worktrees;
-- Pi package settings or installed package caches;
-- npm registry artifacts;
-- source files.
+## Cleanup
 
-## Retention proof
+`grok_build cleanup` deletes package-owned evidence for one inactive session. It can remove the assigned worktree and session artifacts. It does not stage, commit, delete, or rewrite parent repository files.
 
-A cleanup receipt proves package-owned artifact disposition for one job. Provider-side deletion, Grok memory deletion, auth deletion, and Pi tool exposure teardown require separate owner-specific receipts.
+Cleanup is denied while a turn is active; cancel first when stopping an active run.
+
+## Output bounds
+
+Tool responses include session state, cursor, wait receipt, answer preview or artifact path, media artifact paths, and change artifact paths. Full answers, diffs, copied inputs, copied generated media, and event logs stay on disk.

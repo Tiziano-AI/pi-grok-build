@@ -1,95 +1,158 @@
-# pi-grok-build
+# Pi Grok Build
 
-Pi package for bringing **xAI Grok Build** into Pi as a source-inspectable extension, tool, and skill.
+Use Grok Build from Pi as a managed collaborator.
 
-`pi-grok-build` gives Pi a native `grok_build` tool surface and package docs for operating Grok Build with explicit consent, retained evidence, and bounded output.
+`pi-grok-build` is a Pi package that gives Pi one tool, `grok_build`, for delegating review, research, candidate edits, and media work to Grok Build without leaving the Pi session. Pi stays the parent agent: it starts Grok work, waits for results, sends follow-ups, inspects artifacts, cancels stale work, and decides what to accept.
 
-## Status
+The package is source-inspectable and deliberately small:
 
-`pi-grok-build` is in the `0.0.x` bootstrap line.
+- `grok_build` for model-facing delegation;
+- `/grok-build` for human diagnostics;
+- a fixed widget for active sessions, failures, and diagnostics;
+- retained artifacts for answers, copied inputs, generated media, and edit diffs;
+- explicit consent before prompt-carrying work goes to Grok/xAI.
 
-Published `0.0.3` is the current foundational npm default. Current source is the `0.0.4` read-only readiness/preflight candidate: still pre-operational, with `doctor` plus foundational `preflight` evidence.
-
-Current scope:
-
-- Pi package manifest with `pi.extensions` and `pi.skills`
-- read-only `grok_build` tool with `action: "doctor"` and `action: "preflight"`
-- `pi-grok-build` skill
-- package-shape and contract tests plus npm pack dry-run gate
-- public docs for capability, evidence, consent, security, release, and authority boundaries
-
-The doctor is the first-success package/environment path. Preflight is the read-only next-step proof before operational delegation.
-
-## Product direction
-
-Grok Build is a terminal coding agent with interactive, headless, and agent-protocol modes. Pi Grok Build provides a Pi-owned supervision layer around that product:
-
-- one model-facing Pi tool: `grok_build`
-- read-only bootstrap actions for discovery and preflight evidence
-- curated lifecycle actions for future launch, status, results, cancellation, and cleanup
-- operator-owned launch profiles and executable identity policy
-- explicit consent before prompt-carrying provider/subscription use
-- bounded previews with artifact paths for full evidence
-- source/package/Pi-loader/live-proof separation
+The backend runtime is `grok agent stdio` over ACP. No `grok -p`, raw xAI API path, TUI scraping, relay, or fallback runtime is part of the product.
 
 ## Install
 
-From npm after reviewing the published source:
+From npm:
 
 ```bash
 pi install npm:pi-grok-build
 ```
 
-From a trusted local checkout:
+From a local checkout:
 
 ```bash
 pi install /absolute/path/to/pi-grok-build
 ```
 
-For one-session testing without writing package settings:
+Reload Pi after installation or source changes before expecting the active tool surface to change.
 
-```bash
-pi -e /absolute/path/to/pi-grok-build
+## Delegate with `grok_build`
+
+Model-facing tool:
+
+```text
+grok_build
 ```
 
-## First success today
+Actions:
 
-Ask Pi to use the `grok_build` tool for package/environment discovery:
+```text
+start | send | status | result | changes | cancel | cleanup
+```
+
+Use it when the Pi parent should ask Grok Build to do sidecar work:
+
+- get a second review of a local repository;
+- run grounded research through Grok;
+- prepare candidate edits in an isolated worktree;
+- generate or edit media and return artifact paths;
+- continue the same Grok session with follow-up instructions.
+
+`doctor` and `preflight` are not model-facing actions. They are human diagnostics under `/grok-build`.
+
+## Human command
+
+```text
+/grok-build doctor
+/grok-build preflight
+/grok-build status g1
+/grok-build result g1
+/grok-build changes g1
+/grok-build cancel g1
+/grok-build cleanup g1
+```
+
+`/grok-build start` and `/grok-build send` ask for interactive confirmation before sending prompt-carrying work to Grok/xAI.
+
+## Profiles
+
+Choose the narrowest profile that can do the job.
+
+| Profile | Use for | Writes | Web/current evidence | Media |
+| --- | --- | ---: | ---: | ---: |
+| `local-review` | local source or repo review | no | no | no |
+| `grounded-review` | repo review with current external evidence | no | yes | no |
+| `deep-research` | broader research or decomposition | no | yes | no |
+| `worktree-edit` | candidate edits without web | yes | no | no |
+| `grounded-edit` | candidate edits with current evidence | yes | yes | no |
+| `media` | image/video generation or editing | artifact only | no by default | yes |
+
+## Typical use
+
+Delegate a review:
 
 ```json
-{ "action": "doctor" }
+{
+  "action": "start",
+  "cwd": "/absolute/git/workspace",
+  "profile": "local-review",
+  "task": "Review this repository for API drift and report the highest-risk findings.",
+  "confirm_provider_use": true
+}
 ```
 
-For foundational readiness evidence before any operational delegation design:
+Wait for the collaborator's answer:
 
 ```json
-{ "action": "preflight" }
+{ "action": "result", "session": "g1", "wait_seconds": 30, "preview": true }
 ```
 
-The doctor reports whether `grok-build` or `grok` is discoverable on `PATH` and may include absolute candidate executable paths. Preflight returns a read-only checklist of executable-candidate evidence, current authority posture, and deferred launch gates. Treat both results as evidence for that invocation. Operational readiness requires the stronger proof ladder in [Evidence ledger](docs/evidence.md).
+Send a follow-up into the same Grok session:
 
-## Control-plane docs
+```json
+{
+  "action": "send",
+  "session": "g1",
+  "task": "Now focus on the CLI surface and release risks.",
+  "confirm_provider_use": true
+}
+```
 
-- [Architecture](ARCH.md)
-- [Vision](VISION.md)
-- [Security](SECURITY.md)
-- [Privacy](PRIVACY.md)
-- [Terms](TERMS.md)
-- [Release](RELEASE.md)
-- [Control plane](docs/control-plane.md)
-- [Capabilities](docs/capabilities.md)
-- [Evidence ledger](docs/evidence.md)
-- [Authority matrix](docs/authority-matrix.md)
-- [Configuration](docs/configuration.md)
-- [Consent and provider use](docs/consent-and-provider-use.md)
-- [Artifacts and retention](docs/artifacts-and-retention.md)
-- [Release provenance](docs/release-provenance.md)
-- [ADR 0001: name and boundary](docs/adr-0001-name-and-boundary.md)
-- [ADR 0002: Pi tool contract](docs/adr-0002-pi-tool-contract.md)
+Inspect candidate edit-session changes:
 
-Local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` files are ignored checkout/session notes. Durable package policy belongs in the tracked docs above.
+```json
+{ "action": "changes", "session": "g1", "preview": true }
+```
 
-## Development checks
+Stop and remove retained evidence:
+
+```json
+{ "action": "cancel", "session": "g1", "reason": "User stopped the run." }
+{ "action": "cleanup", "session": "g1" }
+```
+
+## Consent
+
+`start` and `send` can send prompts, repository context, local artifacts, and selected tool behavior to Grok/xAI through the locally authenticated Grok CLI. They require `confirm_provider_use:true` after explicit current authorization.
+
+Diagnostics, install checks, and old successful runs do not grant provider-use consent.
+
+## Worktrees
+
+Write-capable profiles require a clean parent git repository. The package creates a session-owned assigned git worktree under its artifact root and launches Grok there. The parent repository is not the edit target. `changes` reads the assigned worktree and reports files and diff artifacts.
+
+Root `grok --worktree` is not used as the isolation primitive, and there is no model-facing worktree knob.
+
+## Media
+
+Media inputs are local image files only:
+
+- accepted: absolute JPG, PNG, or WebP paths under the admitted workspace or a prior package artifact root;
+- denied: URLs, GIF/HEIC/HEIF, inline payloads, credential/control roots, unsupported extensions, and images smaller than 8 px per side or 512 total pixels;
+- transport: copied, hashed, checked, and sent as ACP embedded `resource` blobs after `embeddedContext` proof;
+- output: generated image/video files returned by Grok are copied into package-owned turn media artifacts.
+
+## Widget
+
+The fixed widget key is `grok-build:fixed`. It shows active sessions, failed sessions that need attention, and diagnostics. Completed and explicitly cancelled sessions are not alerts. The package does not use a footer status or dashboard shell.
+
+## Validation
+
+For source/package changes run:
 
 ```bash
 npm test
@@ -97,10 +160,4 @@ npm run check:pack
 git diff --check
 ```
 
-`npm run check:pack` uses `npm pack --dry-run --json` without leaving a tarball behind.
-
-## Security posture
-
-Pi packages run with the user's full local permissions. Review source before installing any Pi package, including this one.
-
-The bootstrap runtime scope is read-only discovery and preflight evidence with zero non-peer package dependencies, shell execution, network calls, credential reads, provider use, Grok Build process launch, or filesystem mutation.
+Live/provider proof is separate and requires explicit authorization before any prompt-carrying Grok run.

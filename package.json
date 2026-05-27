@@ -1,12 +1,13 @@
 {
   "name": "pi-grok-build",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
-  "description": "Bootstrap Pi package for a source-inspectable xAI Grok Build integration.",
+  "description": "Use Grok Build from Pi as a managed collaborator for review, research, edits, and media.",
   "keywords": [
     "pi-package",
     "pi",
     "pi-extension",
+    "pi-coding-agent",
     "grok-build",
     "grok",
     "xai",
@@ -49,6 +50,7 @@
   "peerDependencies": {
     "@earendil-works/pi-ai": "*",
     "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
     "typebox": "*"
   },
   "pi": {

@@ -1,34 +1,16 @@
-# Authority Matrix
+# Authority matrix
 
-This matrix defines how `pi-grok-build` admits authority. Current code implements read-only `doctor` and `preflight`; future rows become tests before operational release.
-
-| Request/state | Disposition | Required behavior | Rationale |
+| Surface | Allowed when | Side effects | Guardrail |
 | --- | --- | --- | --- |
-| `grok_build` with missing action | Allowed | Treat as `doctor` | Safe bootstrap default. |
-| `grok_build` with `action: "doctor"` | Allowed | Read-only PATH candidate check | Package/environment discovery only. |
-| `grok_build` with `action: "preflight"` | Allowed | Read-only readiness/preflight evidence | Pre-operational proof without Grok Build process launch. |
-| Operational action in `0.0.x` | Guarded | Return unsupported action | Operational lifecycle belongs to future releases. |
-| Raw Grok Build launch flags | Operator-owned | Accept only through future profile config | Keeps model-facing inputs stable and reviewable. |
-| Executable path | Operator-owned | Accept only through future trusted config or identity policy | Launching local binaries is an authority transfer. |
-| Environment variables or credentials | Secret-owned | Keep out of tool arguments and model-facing output | Secrets are never package prompt data. |
-| Auto-discovered `grok` candidate | Candidate only | Require operator acceptance or identity verification before launch | `grok` is an executable candidate, not a trust root. |
-| Prompt-carrying launch | Consent-gated | Require per-run consent or explicit preauthorization config | Provider/subscription use is externally visible and billable. |
-| Worktree mutation | Profile-gated | Require write-capable profile and dirty-state policy | Read-only and write-capable work need separate contracts. |
-| Artifact path | Package-owned | Keep under package artifact root | Cleanup and result paths need clear ownership. |
-| Process cancellation | Job-owned | Address only package-created jobs | Avoid controlling unrelated local processes. |
-| Status/result lookup | Job-owned | Require known package job id | Job handles are authority boundaries. |
-| Concurrent launch | Policy-owned | Use explicit concurrency and locking policy | Avoid process/artifact collisions. |
-| Large output | Artifact-backed | Return bounded previews with full artifact paths | Protect context while preserving evidence. |
-| Package publish/dist-tags | Human-owned | Require exact publication authorization | Registry writes are external release actions. |
+| `/grok-build doctor` | Any time | Local non-prompt discovery | No prompt, no mutation. |
+| `/grok-build preflight` | Any time | Local readiness checks | No prompt, no mutation. |
+| `grok_build start` | Explicit provider-use authorization | Starts Grok ACP worker; may create artifacts or assigned worktree | Requires `confirm_provider_use:true`, admitted git cwd, profile policy, and media admission. |
+| `grok_build send` | Explicit provider-use authorization | Queues a prompt-carrying follow-up | Requires `confirm_provider_use:true`; terminal sessions denied; failed media admission drops the turn. |
+| `grok_build status` | Known session | Reads ledger | No provider prompt. |
+| `grok_build result` | Known session | Reads answer/error/artifact ledger | No provider prompt. |
+| `grok_build changes` | Inactive write-capable session | Reads assigned worktree and writes change artifacts | Denied for read-only profiles and active turns. |
+| `grok_build cancel` | Known session and explicit stop intent | Sends cancel or marks session cancelled | Does not delete evidence. |
+| `grok_build cleanup` | Known inactive session | Deletes package-owned evidence and worktree | Denied while active; does not touch parent repo files. |
+| `npm publish` | Exact human authorization | Public package publication | Never publish without package, version, and tag approval. |
 
-## Future test obligations
-
-Before adding `start`, tests must assert at minimum:
-
-- unsupported actions are rejected;
-- additional properties are rejected;
-- raw launch fields stay outside the public schema;
-- missing consent/preauthorization blocks launch;
-- path traversal cannot select artifact or cleanup paths;
-- unowned job ids cannot be cancelled or cleaned;
-- output is bounded or saved to an artifact path.
+Credentials and raw auth material stay outside tool inputs, docs, logs, and artifacts. The package relies on Grok's local authenticated runtime; it does not read credential files.

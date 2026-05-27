@@ -1,9 +1,7 @@
 # Terms
 
-This project is provided as-is under the MIT License.
+Use `pi-grok-build` only with Grok/xAI accounts, repositories, files, media, and prompts you are authorized to use.
 
-`pi-grok-build` is a local Pi package foundation for integrating with xAI Grok Build. Pi owns the local package surface; xAI/Grok Build owns service availability, account access, provider behavior, and billing terms.
+`start` and `send` may use external provider resources or subscriptions. The caller is responsible for authorization, cost, policy compliance, and acceptance of outputs.
 
-Users are responsible for complying with the terms, acceptable-use rules, privacy policies, subscription rules, billing policies, and enterprise policies of Pi, Grok Build, xAI, GitHub, npm, and any tools or services they explicitly enable.
-
-The bootstrap package provides read-only candidate discovery and foundational preflight evidence. Future operational releases will distinguish package behavior from Grok Build/xAI provider behavior and cite current official documentation or observed runtime evidence for provider claims.
+Grok output is evidence until the Pi parent or a human validates and accepts it.

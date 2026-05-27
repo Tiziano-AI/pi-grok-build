@@ -30,14 +30,34 @@ const requiredPublicDocs = [
 	"docs/release-provenance.md",
 ];
 
+const requiredExtensionFiles = [
+	"extensions/grok-build/index.ts",
+	"extensions/grok-build/src/acp-client.ts",
+	"extensions/grok-build/src/changes.ts",
+	"extensions/grok-build/src/cwd-policy.ts",
+	"extensions/grok-build/src/grok-launch.ts",
+	"extensions/grok-build/src/input-artifacts.ts",
+	"extensions/grok-build/src/ledger.ts",
+	"extensions/grok-build/src/native.ts",
+	"extensions/grok-build/src/output-artifacts.ts",
+	"extensions/grok-build/src/paths.ts",
+	"extensions/grok-build/src/profiles.ts",
+	"extensions/grok-build/src/rendering.ts",
+	"extensions/grok-build/src/schemas.ts",
+	"extensions/grok-build/src/service.ts",
+	"extensions/grok-build/src/types.ts",
+];
+
 test("package identity and Pi manifest are canonical", () => {
 	assert.equal(pkg.name, "pi-grok-build");
-	assert.equal(pkg.version, "0.0.4");
+	assert.equal(pkg.version, "0.0.5");
 	assert.equal(pkg.private, undefined);
-	assert.equal(pkg.description, "Bootstrap Pi package for a source-inspectable xAI Grok Build integration.");
+	assert.equal(pkg.description, "Use Grok Build from Pi as a managed collaborator for review, research, edits, and media.");
 	assert.deepEqual(pkg.pi.extensions, ["./extensions/grok-build/index.ts"]);
 	assert.deepEqual(pkg.pi.skills, ["./skills"]);
 	assert.ok(pkg.keywords.includes("pi-package"));
+	assert.ok(pkg.keywords.includes("pi-extension"));
+	assert.ok(pkg.keywords.includes("pi-coding-agent"));
 	assert.ok(pkg.keywords.includes("grok-build"));
 	assert.equal(pkg.publishConfig.access, "public");
 });
@@ -47,16 +67,13 @@ test("Pi-bundled core imports stay peer-only", () => {
 	assert.deepEqual(pkg.peerDependencies, {
 		"@earendil-works/pi-ai": "*",
 		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
 		typebox: "*",
 	});
 });
 
 test("declared public package files exist", () => {
-	for (const path of [
-		...requiredPublicDocs,
-		"extensions/grok-build/index.ts",
-		"skills/pi-grok-build/SKILL.md",
-	]) {
+	for (const path of [...requiredPublicDocs, ...requiredExtensionFiles, "skills/pi-grok-build/SKILL.md"]) {
 		assert.ok(existsSync(join(root, path)), `${path} should exist`);
 	}
 });
@@ -76,7 +93,7 @@ test("local operator notes are ignored, not public source contract", () => {
 	}
 });
 
-test("bootstrap surface is positive, Pi-native, and source-inspectable", () => {
+test("operational surface is positive, Pi-native, and source-inspectable", () => {
 	const corpus = [
 		"README.md",
 		"ARCH.md",
@@ -101,12 +118,16 @@ test("bootstrap surface is positive, Pi-native, and source-inspectable", () => {
 		.map(readText)
 		.join("\n");
 	assert.match(corpus, /grok_build/);
-	assert.match(corpus, /doctor/);
-	assert.match(corpus, /preflight/);
+	assert.match(corpus, /start \| send \| status \| result \| changes \| cancel \| cleanup/);
+	assert.match(corpus, /doctor.*preflight/s);
+	assert.match(corpus, /slash\/operator/i);
 	assert.match(corpus, /source-inspectable/i);
-	assert.match(corpus, /absolute candidate executable paths/i);
+	assert.match(corpus, /assigned git worktree/i);
+	assert.match(corpus, /fixed widget/i);
 	assert.match(corpus, /Pi package/);
 	assert.match(corpus, /Grok Build/);
+	assert.match(corpus, /managed collaborator/i);
+	assert.match(corpus, /delegat/i);
 	assert.doesNotMatch(corpus, new RegExp("Non" + "-goals", "i"));
 	assert.doesNotMatch(corpus, new RegExp("Reject" + "ed alternatives", "i"));
 	assert.doesNotMatch(corpus, /only implemented action/i);

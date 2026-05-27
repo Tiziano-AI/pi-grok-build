@@ -1,28 +1,19 @@
 # Changelog
 
-## 0.0.4 - Unreleased
+## 0.0.5 - 2026-05-27
 
-- Add read-only `grok_build preflight` for foundational readiness evidence without launching Grok Build.
-- Keep `doctor` as the package/environment first-success path.
-- Document the preflight claim ceiling across the canonical control-plane corpus.
-- Add static contract tests for the action enum, narrow input schema, preflight authority fields, and package-local source behavior.
+- Reframes the README and package description around Pi delegating work to Grok Build as a managed collaborator.
 
-## 0.0.3 - 2026-05-26
+## 0.0.4 - 2026-05-27
 
-- Refine public product posture around what Pi Grok Build is and how the bootstrap works.
-- Rename the safety matrix to `docs/authority-matrix.md` and frame constraints as positive authority boundaries.
-- Keep the package clearly in the foundational `0.0.x` doctor-only line while preparing it to be the current npm default.
-- Refresh package-shape tests for the positive public surface.
+- Replaces the bootstrap diagnostic tool with the operational `grok_build` lifecycle: `start`, `send`, `status`, `result`, `changes`, `cancel`, `cleanup`.
+- Moves `doctor` and `preflight` to `/grok-build` human diagnostics.
+- Adds six curated profiles: `local-review`, `grounded-review`, `deep-research`, `worktree-edit`, `grounded-edit`, and `media`.
+- Adds Grok ACP supervision through `grok agent stdio`.
+- Adds package-owned session records, assigned edit worktrees, answer artifacts, change artifacts, copied media inputs, and copied generated media outputs.
+- Adds a fixed `grok-build:fixed` widget with no footer status.
+- Tightens cancellation, cleanup, media admission, and terminal-error behavior from live/provider testing.
 
-## 0.0.2 - 2026-05-25
+## 0.0.3
 
-- Bootstrap the public control-plane docs: architecture, vision, security, privacy, terms, release, capabilities, evidence, authority, configuration, consent, artifacts, release provenance, and Pi tool ADR.
-- Move durable package policy out of tracked `AGENTS.md`; local `AGENTS.md`, `PLAN.md`, and `HANDOFF.md` are now ignored operator/session notes.
-- Tune package metadata for the bootstrap line and current doctor-only behavior.
-- Align Pi core peer dependency ranges with Pi package documentation.
-
-## 0.0.1 - 2026-05-25
-
-- Reserve the `pi-grok-build` package, repository, Pi tool, and Pi skill identity.
-- Add a source-inspectable bootstrap Pi package with a read-only `grok_build` doctor tool.
-- Document the first product boundary: Pi package, Pi extension, Pi tool, Pi skill, and source-reviewed dependency posture.
+- Published bootstrap package with read-only diagnostic actions.

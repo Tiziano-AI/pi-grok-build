@@ -1,78 +1,98 @@
 # Architecture
 
-`pi-grok-build` is a Pi package made of one extension and one skill.
+`pi-grok-build` is a Pi-native supervisor that lets Pi use Grok Build as a managed collaborator. Pi stays the parent authority. Grok runs as a sidecar through ACP over `grok agent stdio`.
+
+## Public surfaces
+
+- Model tool: `grok_build`
+- Tool actions: `start | send | status | result | changes | cancel | cleanup`
+- Human command: `/grok-build`
+- Widget key: `grok-build:fixed`
+
+`doctor` and `preflight` are slash/operator diagnostics. They are not model-facing tool actions.
+
+## Runtime boundary
+
+The only backend runtime is:
 
 ```text
-Pi package manifest
-  ├─ extension: extensions/grok-build/index.ts
-  │    └─ model-facing tool: grok_build { action: "doctor" | "preflight" }
-  └─ skill root: skills/
-       └─ skill: pi-grok-build
+grok --no-auto-update --cwd <execution-cwd> --sandbox <profile> --always-approve ... agent --no-leader stdio
 ```
 
-The current tool performs read-only package/environment discovery and foundational preflight evidence. Operational delegation will be added only after the launch, consent, state, artifact, and proof contracts are implemented together.
+Excluded runtime paths: headless `grok -p`, terminal/TUI scraping, raw xAI API calls, relay/WebSocket backends, and root `grok --worktree` as an edit-isolation primitive.
 
-## Public surface
+## Source layout
 
-The canonical Pi model-facing surface is one tool:
+- `extensions/grok-build/index.ts`: registers the tool, slash command, and widget.
+- `extensions/grok-build/src/schemas.ts`: closed model-facing schema.
+- `extensions/grok-build/src/profiles.ts`: six curated profiles.
+- `extensions/grok-build/src/service.ts`: lifecycle dispatcher.
+- `extensions/grok-build/src/ledger.ts`: session, turn, and event records.
+- `extensions/grok-build/src/acp-client.ts`: ACP process supervision.
+- `extensions/grok-build/src/grok-launch.ts`: profile-to-Grok argv mapping.
+- `extensions/grok-build/src/cwd-policy.ts`: git workspace admission and cleanliness.
+- `extensions/grok-build/src/changes.ts`: assigned worktrees and diff artifacts.
+- `extensions/grok-build/src/input-artifacts.ts`: local media input admission and ACP resource blocks.
+- `extensions/grok-build/src/output-artifacts.ts`: copied generated media artifacts.
+- `extensions/grok-build/src/native.ts`: local slash diagnostics.
+- `extensions/grok-build/src/rendering.ts`: compact tool rendering and fixed widget.
+
+## State
+
+Default state root:
 
 ```text
-grok_build
+~/.pi/agent/pi-grok-build
 ```
 
-Implemented read-only actions:
+A session has a public handle such as `g1`, an internal id, a profile, turns, events, and artifacts.
+
+Turn states:
 
 ```text
-doctor | preflight
+queued -> sent -> streaming -> completed
+queued|sent|streaming -> failed|cancelled|dropped
 ```
 
-Planned governed lifecycle actions:
+Session states:
 
 ```text
-start | status | result | cancel | cleanup
+starting | turn_active | idle | failed | cancelled | cleaned
 ```
 
-Additional actions such as follow-up turns or change readback will be designed from observed Grok Build behavior and added through later ADRs.
+## Worktree isolation
 
-## Source layers
+Write-capable profiles use assigned worktrees:
 
-| Layer | Owner | Current status |
-| --- | --- | --- |
-| Package manifest | `package.json` | Declares Pi extension and skill resources. |
-| Extension source | `extensions/grok-build/index.ts` | Registers read-only `grok_build doctor` and `grok_build preflight`. |
-| Skill source | `skills/pi-grok-build/SKILL.md` | Teaches Pi agents the bootstrap boundary. |
-| Public docs | root docs and `docs/` | Define product, capability, proof, release, and authority contracts. |
-| Local operator notes | ignored `AGENTS.md`, `PLAN.md`, `HANDOFF.md` | Local checkout/session guidance only. |
-| Runtime state | ignored `.pi/`, future artifact roots | Local runtime evidence, not portable source. |
+1. admit a cwd inside a git repository;
+2. require a clean parent repository;
+3. create a package-owned worktree under the session artifact root;
+4. launch Grok with that worktree as `--cwd`;
+5. record pre-prompt worktree proof;
+6. read `changes` from that worktree only.
 
-## Intended mature flow
+The parent repository remains the source of truth until a human or Pi parent accepts the diff.
 
-The operational architecture is a supervised Pi extension lifecycle:
+## Media flow
 
-```text
-grok_build start
-  ├─ admit cwd and profile
-  ├─ verify operator configuration and consent
-  ├─ verify executable identity/launch policy
-  ├─ create pi-grok-build-owned job and artifact root
-  ├─ launch Grok Build through the selected profile
-  └─ stream bounded status while retaining full artifacts
+Media inputs are local files. The package copies them, hashes them, checks extension and dimensions, denies credential/control roots, and sends ACP `resource` blocks only after Grok advertises `embeddedContext`.
 
-grok_build status/result/cancel/cleanup
-  ├─ require pi-grok-build-owned job id
-  ├─ enforce terminal-state and ownership rules
-  ├─ return bounded model-facing previews
-  └─ preserve artifact paths/checksums for full evidence
+Generated image/video paths returned by Grok from its local session store are copied into package-owned turn media artifacts and then reported as paths.
+
+## Consent and authority
+
+`start` and `send` require explicit provider-use confirmation. Pi or the human keeps authority for validation, commits, publication, credentials, and destructive decisions.
+
+## UI
+
+The widget is fixed, compact, and width-bounded. It shows active sessions, failed sessions that need attention, and diagnostics. Explicitly cancelled sessions are stopped history, not alerts. The package does not use a footer status.
+
+## Validation
+
+```bash
+npm test
+npm run check:pack
+git diff --check
 ```
 
-## Launch and ownership principles
-
-- Pi owns the package surface and parent-agent supervision.
-- Grok Build owns its native coding-agent execution.
-- Operator configuration owns raw launch policy and provider/auth posture.
-- `pi-grok-build` owns job ids, retained artifacts, output bounds, cancellation receipts, and cleanup receipts for jobs it creates.
-- Parent Pi remains final authority for acceptance, validation, commits, publication, and user-facing claims.
-
-## External authority boundary
-
-Official xAI docs checked on 2026-05-26 describe Grok Build as usable through interactive, headless, and agent-protocol modes. They also document `grok inspect` as a discovery command. Those are Grok Build capabilities. `pi-grok-build` adopts a capability only when this repo adds the corresponding source contract, implementation, and proof lane.
+Runtime claims need Pi load evidence. Provider claims need explicit authorization and observed live Grok behavior.

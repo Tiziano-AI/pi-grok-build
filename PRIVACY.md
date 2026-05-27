@@ -1,35 +1,15 @@
 # Privacy
 
-## Current release
+`pi-grok-build` can send prompt-carrying work to Grok/xAI when `grok_build start` or `grok_build send` is called with explicit provider-use confirmation.
 
-`pi-grok-build@0.0.x` is local and stateless. It keeps the bootstrap interaction inside package/environment discovery and foundational preflight evidence.
+A live session may expose:
 
-The current `grok_build doctor` and `grok_build preflight` actions return:
+- task text;
+- selected profile behavior;
+- repository or file content Grok reads through its own tools;
+- local media inputs attached to a media session;
+- generated media and answer content.
 
-- current Pi cwd;
-- whether candidate executables named `grok-build` or `grok` are executable on `PATH`;
-- absolute candidate executable paths when a candidate is found;
-- bootstrap status, preflight checks, and deferred launch gates.
+The package stores local receipts, event logs, answer artifacts, copied media inputs, generated media copies, and edit diffs under its state root. `grok_build cleanup` removes retained package-owned evidence for an inactive addressed session.
 
-They keep Grok credential files, account files, shell histories, project source files, provider state, Grok Build process output, and package artifacts outside the current actions.
-
-## Future retained evidence
-
-Future operational releases may need a package-owned artifact root for job ledgers, bounded previews, full output, receipts, and cleanup proof. Before implementation, this repo documents and tests:
-
-- artifact root ownership;
-- job-id path safety;
-- retention defaults;
-- redaction policy;
-- cleanup limits;
-- what remains outside package control.
-
-See [Artifacts and retention](docs/artifacts-and-retention.md).
-
-## Provider data
-
-When future prompt-carrying Grok Build launches are implemented, data handling depends on Grok Build's own mode, authentication, local configuration, and xAI/Grok infrastructure. `pi-grok-build` cites current official xAI documentation or observed runtime behavior for those provider semantics and labels proof gaps.
-
-## Local operator notes
-
-Ignored `AGENTS.md`, `PLAN.md`, `HANDOFF.md`, `.pi/`, logs, sessions, and future artifact roots are local/runtime state. Public package source lives in tracked docs and package files.
+Diagnostics such as `/grok-build doctor` and `/grok-build preflight` do not send prompts. The package does not read credential files, print tokens, or accept raw provider credentials in tool inputs.
