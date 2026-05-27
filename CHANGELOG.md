@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0 - 2026-05-27
+
+- Marks the first operational Grok Build delegation release after live stress coverage across review, grounded research, worktree edit, grounded edit, media input/output, follow-up, cancellation, cleanup, and denial paths.
+
 ## 0.0.6 - 2026-05-27
 
 - Reissues the collaborator-focused package from a clean git release commit so npm provenance and source history line up.

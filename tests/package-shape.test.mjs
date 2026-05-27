@@ -50,7 +50,7 @@ const requiredExtensionFiles = [
 
 test("package identity and Pi manifest are canonical", () => {
 	assert.equal(pkg.name, "pi-grok-build");
-	assert.equal(pkg.version, "0.0.6");
+	assert.equal(pkg.version, "0.1.0");
 	assert.equal(pkg.private, undefined);
 	assert.equal(pkg.description, "Use Grok Build from Pi as a managed collaborator for review, research, edits, and media.");
 	assert.deepEqual(pkg.pi.extensions, ["./extensions/grok-build/index.ts"]);
