@@ -1,6 +1,6 @@
 {
   "name": "pi-grok-build",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "description": "Use Grok Build from Pi as a managed collaborator for review, research, edits, and media.",
   "keywords": [

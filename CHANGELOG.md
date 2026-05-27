@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.6 - 2026-05-27
+
+- Reissues the collaborator-focused package from a clean git release commit so npm provenance and source history line up.
+
 ## 0.0.5 - 2026-05-27
 
 - Reframes the README and package description around Pi delegating work to Grok Build as a managed collaborator.
